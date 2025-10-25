@@ -1,41 +1,65 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import "./Home.css";
 
 export default function Home() {
   const navigate = useNavigate();
+  const pressTimer = useRef<number | null>(null);
 
   const handleAdminClick = () => {
-    const senhaCorreta = "12345"; // 🔹 Defina aqui a senha temporária
+    const senhaCorreta = "12345";
     const senhaDigitada = prompt("Digite a senha de administrador:");
-
-    if (senhaDigitada === senhaCorreta) {
-      navigate("/admin");
-    } else if (senhaDigitada !== null) {
-      alert("❌ Senha incorreta!");
-    }
+    if (senhaDigitada === senhaCorreta) navigate("/admin");
+    else if (senhaDigitada !== null) alert("❌ Senha incorreta!");
   };
+
+  // Atalho de teclado: Ctrl + Shift + A
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") {
+        handleAdminClick();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Long-press no título (útil no mobile)
+  const startPress = () => {
+    clearTimeout(pressTimer.current!);
+    pressTimer.current = window.setTimeout(() => handleAdminClick(), 900); // 0,9s
+  };
+  const endPress = () => clearTimeout(pressTimer.current!);
 
   return (
     <div className="home-container d-flex flex-column min-vh-100 position-relative">
-      {/* Botão discreto do Admin */}
-      <button className="admin-button btn btn-sm btn-outline-light" onClick={handleAdminClick}>
-        ⚙️ Admin
-      </button>
-
       {/* Header */}
       <header className="bg-light shadow-sm py-3">
         <div className="container text-center">
-          <h1 className="fw-bold text-primary">Minha Loja PWA</h1>
-          <p className="text-muted mb-0">Moda e estilo na palma da sua mão 💅</p>
+          <h1
+            className="fw-bold text-primary home-title"
+            onDoubleClick={handleAdminClick}
+            onMouseDown={startPress}
+            onMouseUp={endPress}
+            onTouchStart={startPress}
+            onTouchEnd={endPress}
+            title="Minha Loja (duplo clique ou segure para admin)"
+          >
+            Loja de Roupas
+          </h1>
+          <p className="text-muted mb-0">
+            Aqui você recebe um atendimento personalizado
+          </p>
         </div>
       </header>
 
-      {/* Banner */}
+      {/* Banner / Hero */}
       <section className="banner flex-grow-1 d-flex align-items-center justify-content-center text-center text-light">
-        <div>
-          <h2 className="display-6 fw-bold">Bem-vindo(a) à nossa loja!</h2>
-          <p className="lead mb-4">Descubra produtos incríveis e agende seu horário com facilidade.</p>
-
+        <div className="hero-card container-sm px-4 py-5 rounded-4">
+          <h2 className="display-6 fw-bold mb-3">Bem-vinda à nossa loja!</h2>
+          <p className="lead mb-4">
+            Descubra produtos incríveis e agende seu horário com facilidade.
+          </p>
           <div className="d-flex flex-column flex-sm-row justify-content-center gap-3">
             <Link to="/vitrine" className="btn btn-primary btn-lg px-4">
               Ver Vitrine
@@ -48,8 +72,21 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-dark text-light text-center py-3 mt-auto">
-        <small>© {new Date().getFullYear()} Minha Loja PWA. Todos os direitos reservados.</small>
+      <footer className="app-footer bg-dark text-light text-center py-3 mt-auto position-relative">
+        <small>
+          © {new Date().getFullYear()} Minha Loja PWA. Todos os direitos
+          reservados.
+        </small>
+
+        {/* Botão Admin discreto no rodapé (canto direito) */}
+        <button
+          className="admin-foot-gear"
+          onClick={handleAdminClick}
+          aria-label="Admin"
+          title="Admin"
+        >
+          ⚙️
+        </button>
       </footer>
     </div>
   );

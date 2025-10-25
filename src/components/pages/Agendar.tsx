@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { db } from "../../firebaseConfig";
 import { collection, addDoc, doc, getDoc } from "firebase/firestore";
@@ -10,13 +10,36 @@ export default function Agendar() {
   const [data, setData] = useState("");
   const [hora, setHora] = useState("");
   const [enviando, setEnviando] = useState(false);
-  const navigate = useNavigate();
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
+  const navigate = useNavigate();
+
+  // -------- Admin escondido (mesmo padrão da Home)
+  const pressTimer = useRef<number | null>(null);
+  const handleAdminClick = () => {
+    const senhaCorreta = "12345";
+    const senhaDigitada = prompt("Digite a senha de administrador:");
+    if (senhaDigitada === senhaCorreta) navigate("/admin");
+    else if (senhaDigitada !== null) alert("❌ Senha incorreta!");
+  };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") {
+        handleAdminClick();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  const startPress = () => {
+    clearTimeout(pressTimer.current!);
+    pressTimer.current = window.setTimeout(() => handleAdminClick(), 900);
+  };
+  const endPress = () => clearTimeout(pressTimer.current!);
+  // --------
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setEnviando(true);
-
     try {
       await addDoc(collection(db, "agendamentos"), {
         nome,
@@ -25,11 +48,7 @@ export default function Agendar() {
         hora,
         criadoEm: new Date(),
       });
-
-      setNome("");
-      setTelefone("");
-      setData("");
-      setHora("");
+      setNome(""); setTelefone(""); setData(""); setHora("");
       navigate("/confirmacao");
     } catch (error) {
       console.error("Erro ao agendar:", error);
@@ -43,13 +62,12 @@ export default function Agendar() {
     try {
       const docRef = doc(db, "storeSlots", dataSelecionada);
       const docSnap = await getDoc(docRef);
-
       if (docSnap.exists()) {
         const dados = docSnap.data();
         const slots = dados.slots ? Object.entries(dados.slots) : [];
         const horariosLivres = slots
           .filter(([_, valor]: any) => valor.booked < valor.capacity)
-          .map(([hora]) => hora);
+          .map(([hora]) => hora as string);
         setHorariosDisponiveis(horariosLivres);
       } else {
         setHorariosDisponiveis([]);
@@ -59,46 +77,69 @@ export default function Agendar() {
     }
   };
 
+  const dataEscolhida = Boolean(data);
+
   return (
     <div className="agendar-container min-vh-100 d-flex flex-column">
+      {/* Header (com duplo clique/long-press para admin) */}
       <header className="bg-light shadow-sm py-3">
         <div className="container text-center">
-          <h1 className="fw-bold text-primary">Agendar Horário</h1>
+          <h1
+            className="fw-bold text-primary page-title"
+            onDoubleClick={handleAdminClick}
+            onMouseDown={startPress}
+            onMouseUp={endPress}
+            onTouchStart={startPress}
+            onTouchEnd={endPress}
+            title="Duplo clique ou segure para admin"
+          >
+            Agendar Horário
+          </h1>
           <p className="text-muted mb-0">Preencha as informações abaixo</p>
         </div>
       </header>
 
-      <main className="flex-grow-1 d-flex align-items-center justify-content-center">
+      {/* Seção com o mesmo banner/hero da Home */}
+      <section className="banner flex-grow-1 d-flex align-items-center justify-content-center text-center text-light">
         <form
-          className="agendar-form p-4 shadow-lg rounded-4 bg-white"
+          className="hero-card agendar-form p-4 rounded-4 text-start"
           onSubmit={handleSubmit}
         >
+          <h2 className="h4 mb-3">Seus dados</h2>
+
           <div className="mb-3">
-            <label className="form-label">Nome completo</label>
+            <label className="form-label" htmlFor="nome">Nome completo</label>
             <input
+              id="nome"
               type="text"
               className="form-control"
               required
               value={nome}
               onChange={(e) => setNome(e.target.value)}
+              placeholder="Ex.: Maria Silva"
             />
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Telefone</label>
+            <label className="form-label" htmlFor="tel">Telefone</label>
             <input
+              id="tel"
               type="tel"
               className="form-control"
               required
               value={telefone}
               onChange={(e) => setTelefone(e.target.value)}
+              placeholder="Ex.: (11) 91234-5678"
+              inputMode="numeric"
             />
           </div>
 
+          <h2 className="h4 mt-4 mb-3">Data e horário</h2>
           <div className="row">
             <div className="col-md-6 mb-3">
-              <label className="form-label">Data</label>
+              <label className="form-label" htmlFor="data">Data</label>
               <input
+                id="data"
                 type="date"
                 className="form-control"
                 required
@@ -109,24 +150,32 @@ export default function Agendar() {
                   buscarHorarios(novaData);
                 }}
               />
+              <div className="form-text text-light-subtle">
+                Escolha a data para ver horários disponíveis.
+              </div>
             </div>
+
             <div className="col-md-6 mb-3">
-              <label className="form-label">Hora</label>
+              <label className="form-label" htmlFor="hora">Hora</label>
               <select
+                id="hora"
                 className="form-select"
                 required
                 value={hora}
                 onChange={(e) => setHora(e.target.value)}
+                disabled={!dataEscolhida}
               >
-                <option value="">Selecione um horário</option>
-                {horariosDisponiveis.length > 0 ? (
-                  horariosDisponiveis.map((h) => (
-                    <option key={h} value={h}>
-                      {h}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>Nenhum horário disponível</option>
+                <option value="">
+                  {dataEscolhida ? "Selecione um horário" : "Selecione uma data primeiro"}
+                </option>
+                {dataEscolhida && (
+                  horariosDisponiveis.length > 0 ? (
+                    horariosDisponiveis.map((h) => (
+                      <option key={h} value={h}>{h}</option>
+                    ))
+                  ) : (
+                    <option disabled>Nenhum horário disponível</option>
+                  )
                 )}
               </select>
             </div>
@@ -134,20 +183,29 @@ export default function Agendar() {
 
           <button
             type="submit"
-            className="btn btn-primary w-100 mt-3"
+            className="btn btn-primary w-100 mt-2"
             disabled={enviando}
           >
             {enviando ? "Enviando..." : "Confirmar Agendamento"}
           </button>
 
-          <Link to="/" className="btn btn-link mt-3 text-decoration-none">
+          <Link to="/" className="btn btn-outline-light w-100 mt-2">
             ← Voltar
           </Link>
         </form>
-      </main>
+      </section>
 
-      <footer className="bg-dark text-light text-center py-3">
+      {/* Footer padrão com engrenagem de admin discreta */}
+      <footer className="app-footer bg-dark text-light text-center py-3 mt-auto position-relative">
         <small>© {new Date().getFullYear()} Minha Loja PWA</small>
+        <button
+          className="admin-foot-gear"
+          onClick={handleAdminClick}
+          aria-label="Admin"
+          title="Admin"
+        >
+          ⚙️
+        </button>
       </footer>
     </div>
   );

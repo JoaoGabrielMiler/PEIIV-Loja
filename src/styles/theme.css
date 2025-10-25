@@ -2,24 +2,24 @@
   --brand-1:#4f46e5; /* indigo */
   --brand-2:#0ea5e9; /* sky */
   --text-dark:#0f172a;
+  --glass-bg: rgba(255,255,255,0.08);
+  --glass-brd: rgba(255,255,255,0.18);
 }
 
-.home-container{
+/* Base */
+body, .home-container, .agendar-container{
   font-family:'Poppins',sans-serif;
   background-color:#f8f9fa;
-  position:relative;
 }
 
-/* Banner com degradê animado bem sutil */
+/* Banner com degradê + luz suave animada */
 .banner{
-  /* fallback estático */
   background: linear-gradient(135deg, var(--brand-2) 0%, #6610f2 100%);
   padding: 80px 20px;
   position:relative;
   overflow:hidden;
 }
 .banner::before{
-  /* animação de luz suave */
   content:"";
   position:absolute; inset:-20%;
   background:
@@ -33,20 +33,24 @@
   to{   transform: translateY(8px)  scale(1.03); opacity:1; }
 }
 
-/* Card translúcido (glassmorphism) sobre o degradê */
+/* Card translúcido (glass) */
 .hero-card{
   backdrop-filter: blur(8px) saturate(140%);
   -webkit-backdrop-filter: blur(8px) saturate(140%);
-  background-color: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.18);
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-brd);
   box-shadow: 0 10px 30px rgba(0,0,0,.25);
   color:#fff;
 }
 
+/* Tipografia dentro do banner */
+.banner h2, .banner h1{ color:#fff; }
+.banner p{ color:#e8e8e8; }
+
 /* Botões com micro-interação */
 .btn{
   transform: translateZ(0);
-  transition: transform .12s ease, box-shadow .12s ease;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
 }
 .btn:focus-visible{
   outline: 2px solid #fff;
@@ -60,18 +64,10 @@
   background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
   border: none;
 }
-.btn-primary:hover{
-  filter: brightness(1.05);
-}
+.btn-primary:hover{ filter: brightness(1.05); }
 
-/* Tipografia do hero */
-.banner h2{ color:#fff; }
-.banner p{ color:#e8e8e8; }
-
-/* Footer */
+/* Footer padrão + engrenagem discreta */
 .app-footer{ font-size:.9rem; }
-
-/* Botão Admin discreto no rodapé (canto inferior direito) */
 .admin-foot-gear{
   position:absolute;
   right:14px;
@@ -90,6 +86,6 @@
   transform: rotate(15deg) scale(1.05);
 }
 
-/* (opcional) Título com sutil efeito ao focar */
-.home-title{ cursor: default; }
-.home-title:active{ transform: scale(.995); }
+/* (opcional) efeito sutil no título */
+.page-title{ cursor: default; }
+.page-title:active{ transform: scale(.995); }
