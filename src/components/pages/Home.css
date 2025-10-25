@@ -1,0 +1,42 @@
+.home-container {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
+  position: relative;
+}
+
+.banner {
+  background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+  padding: 80px 20px;
+}
+
+.banner h2 {
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.banner p {
+  color: #e8e8e8;
+}
+
+footer {
+  font-size: 0.9rem;
+}
+
+/* 🔹 Botão Admin discreto no canto superior direito */
+.admin-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: none;
+  color: white;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  transition: background-color 0.2s;
+  z-index: 10;
+}
+
+.admin-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}

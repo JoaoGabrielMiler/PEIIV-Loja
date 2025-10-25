@@ -1,0 +1,13 @@
+.vitrine-container {
+  background-color: #f8f9fa;
+  font-family: 'Poppins', sans-serif;
+}
+
+.card {
+  transition: transform 0.2s ease;
+  border-radius: 1rem;
+}
+
+.card:hover {
+  transform: scale(1.03);
+}

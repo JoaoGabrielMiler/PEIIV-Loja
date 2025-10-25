@@ -1,0 +1,13 @@
+.agendar-container {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
+}
+
+.agendar-form {
+  width: 100%;
+  max-width: 420px;
+}
+
+button {
+  font-weight: 600;
+}
