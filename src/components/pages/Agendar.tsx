@@ -59,23 +59,21 @@ export default function Agendar() {
   };
 
   const buscarHorarios = async (dataSelecionada: string) => {
-    try {
-      const docRef = doc(db, "storeSlots", dataSelecionada);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const dados = docSnap.data();
-        const slots = dados.slots ? Object.entries(dados.slots) : [];
-        const horariosLivres = slots
-          .filter(([_, valor]: any) => valor.booked < valor.capacity)
-          .map(([hora]) => hora as string);
-        setHorariosDisponiveis(horariosLivres);
-      } else {
-        setHorariosDisponiveis([]);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar horários:", error);
+  try {
+    const docRef = doc(db, "horariosDisponiveis", dataSelecionada);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const horarios = docSnap.data().horas || [];
+      setHorariosDisponiveis(horarios);
+    } else {
+      setHorariosDisponiveis([]);
     }
-  };
+  } catch (error) {
+    console.error("Erro ao buscar horários:", error);
+  }
+};
+
 
   const dataEscolhida = Boolean(data);
 

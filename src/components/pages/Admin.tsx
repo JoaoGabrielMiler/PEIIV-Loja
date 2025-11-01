@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { db, storage } from "../../firebaseConfig";
 import { collection, addDoc, setDoc, doc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, uploadBytes,getDownloadURL } from "firebase/storage";
 import "./Admin.css";
 
 export default function Admin() {
@@ -29,8 +29,26 @@ export default function Admin() {
     setMensagem("");
 
     try {
-      const imagemRef = ref(storage, `produtos/${imagem.name}`);
-      await uploadBytes(imagemRef, imagem);
+      const imagemRef = ref(storage, `produtos/${Date.now()}-${imagem.name}`);
+
+      // ✅ Define o tipo MIME da imagem
+      const metadata = {
+        contentType: imagem.type, // ex: "image/jpeg" ou "image/png"
+      };
+
+      // ✅ Faz o upload com metadata
+      const uploadTask = uploadBytesResumable(imagemRef, imagem, metadata);
+
+      // Aguarda o término do upload
+      await new Promise<void>((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          null,
+          (error) => reject(error),
+          () => resolve()
+        );
+      });
+
       const urlImagem = await getDownloadURL(imagemRef);
 
       await addDoc(collection(db, "produtos"), {
@@ -49,12 +67,13 @@ export default function Admin() {
       setImagem(null);
       setMensagem("✅ Produto cadastrado com sucesso!");
     } catch (error) {
-      console.error("Erro:", error);
+      console.error("Erro geral:", error);
       setMensagem("❌ Erro ao salvar produto.");
     } finally {
       setEnviando(false);
     }
   };
+ 
 
   // 🕒 Horários disponíveis
   const salvarHorarios = async (e: React.FormEvent) => {
