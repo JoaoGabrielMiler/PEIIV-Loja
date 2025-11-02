@@ -1,0 +1,119 @@
+:root {
+  --admin-primary: #2563eb;
+  --admin-muted:   #6b7280;
+}
+
+/* Página */
+.adminlist-container {
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(180deg, #96caff 0%, #f3f4f6 100%);
+  min-height: 100vh;
+}
+
+/* Header */
+.adminlist-header {
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+.adminlist-title {
+  color: var(--admin-primary);
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+.adminlist-subtitle { color: var(--admin-muted); }
+
+/* Seções */
+.adminlist-section { margin-bottom: 2.5rem; }
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.section-title .emoji { font-size: 1.35rem; }
+
+.section-divider {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0,0,0,.05), rgba(0,0,0,.12), rgba(0,0,0,.05));
+}
+
+/* Card “base” compatível com Admin */
+.admin-card {
+  max-width: 960px;
+  margin-inline: auto;
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 20px 45px rgba(2,6,23,.08);
+  overflow: hidden;
+}
+
+/* Produtos */
+.product-card {
+  border: none;
+  border-radius: 1rem;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(2,6,23,.12);
+}
+
+.product-card__img {
+  height: 180px;
+  object-fit: cover;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+.product-card__title { font-weight: 700; }
+
+.product-card__price {
+  color: #0ea5e9;            /* azul claro */
+  font-weight: 700;
+  margin: .25rem 0 .5rem;
+}
+
+.product-card__desc {
+  font-size: .9rem;
+  min-height: 2.6em;         /* segura duas linhas */
+}
+
+/* Lista de horários */
+.hours-list .list-group-item {
+  border-color: #e5e7eb;
+  padding: .9rem 1rem;
+}
+
+.hours-list__row {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.hours-list__date { font-weight: 800; }
+.hours-list__slots { color: #111827; }
+
+/* Botões auxiliares (mesmos do Admin) */
+.btn-ghost {
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: .75rem;
+}
+
+.btn-ghost:hover { background: #eef2ff; border-color: #c7d2fe; }
+
+/* Footer */
+.adminlist-footer {
+  background: #0f172a;
+  color: #cbd5e1;
+}

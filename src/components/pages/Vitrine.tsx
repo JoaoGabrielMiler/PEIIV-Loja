@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { db } from "../../firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
-import "./Vitrine.css";
+import "../../styles/Vitrine.css";
 
 interface Produto {
   id: string;
@@ -39,6 +39,7 @@ const MOCK_PRODUTOS: Produto[] = [
   { id: "m7", nome: "Vestido Longo Liso",   categoria: "Vestido",       imagem: makePlaceholder("Vestido", "#0ea5e9", "#7c3aed") },
   { id: "m8", nome: "Blusa Cropped",        categoria: "Blusa",         imagem: makePlaceholder("Blusa", "#f59e0b", "#ec4899") },
   { id: "m9", nome: "Conjunto Moletom",     categoria: "Conjunto",      imagem: makePlaceholder("Conjunto", "#06b6d4", "#4f46e5") },
+  { id: "m10", nome: "Semi Joia",           categoria: "Acessórios",    imagem: makePlaceholder("Semi Joia", "#a4f70bff", "#300002ff") },
 ];
 /* ======================================================= */
 

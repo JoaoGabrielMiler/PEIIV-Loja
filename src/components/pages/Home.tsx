@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef } from "react";
-import "./Home.css";
+import "../../styles/Home.css";
 
 export default function Home() {
   const navigate = useNavigate();

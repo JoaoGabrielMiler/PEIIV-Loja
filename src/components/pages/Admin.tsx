@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { db, storage } from "../../firebaseConfig";
 import { collection, addDoc, setDoc, doc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import "./Admin.css";
+import "../../styles/Admin.css";
 
 export default function Admin() {
   // 🔹 Estados para cadastro de produtos
@@ -85,173 +85,212 @@ export default function Admin() {
   };
 
   return (
-    <div className="admin-container min-vh-100 d-flex flex-column">
-      <header className="bg-light shadow-sm py-3">
+    <div className="admin-container d-flex flex-column min-vh-100">
+      {/* HEADER */}
+      <header className="admin-header py-4">
         <div className="container text-center">
-          <h1 className="fw-bold text-primary">Painel do Administrador</h1>
-          <p className="text-muted mb-0">Gerencie seus produtos e horários</p>
+          <h1 className="admin-title display-5">Painel do Administrador</h1>
+          <p className="admin-subtitle mb-0">Gerencie seus produtos e horários</p>
         </div>
       </header>
 
       <main className="container py-4 flex-grow-1">
-        {/* Cadastro de Produtos */}
-        <section className="admin-section mb-5">
-          <h2 className="text-center mb-4">🛍️ Cadastro de Produtos</h2>
-          <form
-            className="admin-form mx-auto p-4 shadow-lg rounded-4 bg-white"
-            onSubmit={handleUpload}
-          >
-            <div className="mb-3">
-              <label className="form-label">Nome do Produto</label>
-              <input
-                type="text"
-                className="form-control"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                required
-              />
-            </div>
+        {/* CADASTRO DE PRODUTOS */}
+        <section className="admin-section" aria-labelledby="titulo-produtos">
+          <h2 id="titulo-produtos" className="section-title">
+            <span className="emoji" role="img" aria-label="Sacola">🛍️</span>
+            Cadastro de Produtos
+          </h2>
 
-            <div className="mb-3">
-              <label className="form-label">Preço</label>
-              <input
-                type="text"
-                className="form-control"
-                value={preco}
-                onChange={(e) => {
-                  const valor = e.target.value.replace(/\D/g, "");
-                  const numero = parseFloat(valor) / 100;
-                  const formatado = numero.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  });
-                  setPreco(formatado);
-                }}
-                required
-              />
-            </div>
+          <div className="card admin-card">
+            <div className="card-body">
+              <form className="admin-form mx-auto" onSubmit={handleUpload}>
+                <div className="mb-3">
+                  <label className="form-label" htmlFor="nomeProduto">Nome do Produto</label>
+                  <input
+                    id="nomeProduto"
+                    type="text"
+                    className="form-control"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    placeholder="Ex.: Vestido Floral"
+                    required
+                  />
+                </div>
 
-            <div className="mb-3">
-              <label className="form-label">Descrição</label>
-              <textarea
-                className="form-control"
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-                rows={3}
-                required
-              />
-            </div>
+                <div className="mb-3">
+                  <label className="form-label" htmlFor="precoProduto">Preço</label>
+                  <input
+                    id="precoProduto"
+                    type="text"
+                    inputMode="decimal"
+                    className="form-control"
+                    value={preco}
+                    onChange={(e) => {
+                      const valor = e.target.value.replace(/\D/g, "");
+                      const numero = parseFloat(valor || "0") / 100;
+                      const formatado = numero.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      });
+                      setPreco(formatado);
+                    }}
+                    placeholder="Ex.: R$ 199,90"
+                    aria-describedby="precoHelp"
+                    required
+                  />
+                  <div id="precoHelp" className="form-text">
+                    Digite apenas números; formatamos automaticamente.
+                  </div>
+                </div>
 
-            <div className="mb-3">
-              <label className="form-label">Categoria</label>
-              <select
-                className="form-select"
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
-                required
-              >
-                <option value="">Selecione uma categoria</option>
-                <option value="Camisetas">Camisetas</option>
-                <option value="Vestidos">Vestidos</option>
-                <option value="Calças">Calças</option>
-                <option value="Acessórios">Acessórios</option>
-              </select>
-            </div>
+                <div className="mb-3">
+                  <label className="form-label" htmlFor="descricaoProduto">Descrição</label>
+                  <textarea
+                    id="descricaoProduto"
+                    className="form-control"
+                    value={descricao}
+                    onChange={(e) => setDescricao(e.target.value)}
+                    rows={3}
+                    placeholder="Ex.: Tecido leve, ideal para eventos..."
+                    required
+                  />
+                </div>
 
-            <div className="mb-3">
-              <label className="form-label">Imagem do Produto</label>
-              <input
-                type="file"
-                accept="image/*"
-                className="form-control"
-                onChange={(e) => setImagem(e.target.files?.[0] || null)}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary w-100"
-              disabled={enviando}
-            >
-              {enviando ? "Enviando..." : "Salvar Produto"}
-            </button>
-
-            {mensagem && <p className="text-center mt-3">{mensagem}</p>}
-          </form>
-        </section>
-
-        {/* Horários */}
-        <section className="admin-section">
-          <h2 className="text-center mb-4">🕒 Definir Horários Disponíveis</h2>
-          <form
-            className="admin-form mx-auto p-4 shadow-lg rounded-4 bg-white"
-            onSubmit={salvarHorarios}
-          >
-            <div className="mb-3">
-              <label className="form-label">Data</label>
-              <input
-                type="date"
-                className="form-control"
-                value={dataHorario}
-                onChange={(e) => setDataHorario(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="mb-3 d-flex gap-2">
-              <input
-                type="time"
-                className="form-control"
-                value={novaHora}
-                onChange={(e) => setNovaHora(e.target.value)}
-              />
-              <button
-                type="button"
-                className="btn btn-success"
-                onClick={adicionarHora}
-              >
-                ➕
-              </button>
-            </div>
-
-            {horas.length > 0 && (
-              <ul className="list-group mb-3">
-                {horas.map((h) => (
-                  <li
-                    key={h}
-                    className="list-group-item d-flex justify-content-between align-items-center"
+                <div className="mb-3">
+                  <label className="form-label" htmlFor="categoriaProduto">Categoria</label>
+                  <select
+                    id="categoriaProduto"
+                    className="form-select"
+                    value={categoria}
+                    onChange={(e) => setCategoria(e.target.value)}
+                    required
                   >
-                    {h}
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-danger"
-                      onClick={() => removerHora(h)}
-                    >
-                      ✖
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+                    <option value="">Selecione uma categoria</option>
+                    <option value="Camisetas">Camisetas</option>
+                    <option value="Vestidos">Vestidos</option>
+                    <option value="Calças">Calças</option>
+                    <option value="Acessórios">Acessórios</option>
+                  </select>
+                </div>
 
-            <button type="submit" className="btn btn-primary w-100">
-              Salvar Horários
-            </button>
-          </form>
+                <div className="mb-3">
+                  <label className="form-label" htmlFor="imagemProduto">Imagem do Produto</label>
+                  <input
+                    id="imagemProduto"
+                    type="file"
+                    accept="image/*"
+                    className="form-control"
+                    onChange={(e) => setImagem(e.target.files?.[0] || null)}
+                    required
+                  />
+                </div>
+
+                <button type="submit" className="btn btn-gradient w-100" disabled={enviando}>
+                  {enviando ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
+                      Enviando...
+                    </>
+                  ) : (
+                    "Salvar Produto"
+                  )}
+                </button>
+
+                {mensagem && (
+                  <p className="text-center mt-3" aria-live="polite">{mensagem}</p>
+                )}
+              </form>
+            </div>
+          </div>
         </section>
 
+        {/* HORÁRIOS */}
+        <section className="admin-section" aria-labelledby="titulo-horarios">
+          <h2 id="titulo-horarios" className="section-title">
+            <span className="emoji" role="img" aria-label="Relógio">🕒</span>
+            Definir Horários Disponíveis
+          </h2>
+
+          <div className="card admin-card">
+            <div className="card-body">
+              <form className="admin-form mx-auto" onSubmit={salvarHorarios}>
+                <div className="mb-3">
+                  <label className="form-label" htmlFor="dataHorarios">Data</label>
+                  <input
+                    id="dataHorarios"
+                    type="date"
+                    className="form-control"
+                    value={dataHorario}
+                    onChange={(e) => setDataHorario(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="mb-3 d-flex gap-2 align-items-end">
+                  <div className="flex-grow-1">
+                    <label className="form-label" htmlFor="novaHoraInput">Adicionar horário</label>
+                    <input
+                      id="novaHoraInput"
+                      type="time"
+                      className="form-control"
+                      value={novaHora}
+                      onChange={(e) => setNovaHora(e.target.value)}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={adicionarHora}
+                    aria-label="Adicionar horário"
+                    title="Adicionar horário"
+                  >
+                    ➕
+                  </button>
+                </div>
+
+                {horas.length > 0 && (
+                  <ul className="list-group mb-3 hours-list" aria-label="Horários adicionados">
+                    {horas.map((h) => (
+                      <li
+                        key={h}
+                        className="list-group-item d-flex justify-content-between align-items-center"
+                      >
+                        <span>{h}</span>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => removerHora(h)}
+                          aria-label={`Remover horário ${h}`}
+                          title={`Remover horário ${h}`}
+                        >
+                          ✖
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <button type="submit" className="btn btn-gradient w-100">
+                  Salvar Horários
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        {/* AÇÕES FINAIS */}
         <div className="text-center mt-4">
-          <Link to="/admin-listar" className="btn btn-outline-secondary mx-2">
+          <Link to="/admin-listar" className="btn btn-ghost mx-2">
             👁️ Visualizar Itens
           </Link>
-          <Link to="/" className="btn btn-outline-dark mx-2">
+          <Link to="/" className="btn btn-ghost mx-2">
             ← Voltar
           </Link>
         </div>
       </main>
 
-      <footer className="bg-dark text-light text-center py-3 mt-auto">
+      <footer className="admin-footer text-center py-3 mt-auto">
         <small>© {new Date().getFullYear()} Minha Loja PWA</small>
       </footer>
     </div>

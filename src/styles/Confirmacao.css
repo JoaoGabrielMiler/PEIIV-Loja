@@ -1,0 +1,67 @@
+/*.confirmacao-container {
+  background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+}*/
+.confirmacao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f8f9fa;
+  font-family: sans-serif;
+  text-align: center;
+  padding: 2rem;
+}
+
+.confirmacao__title {
+  font-size: 2rem;
+  color: #28a745;
+  margin-bottom: 1rem;
+}
+
+.confirmacao__text {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 1rem;
+  max-width: 420px;
+  white-space: pre-line;
+}
+
+/* Área dos botões */
+.confirmacao__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+/* Botões (estilo local para não conflitar com Bootstrap .btn) */
+.cbtn {
+  padding: 1rem 2rem;
+  background: #222;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  display: inline-block;
+  line-height: 1;
+  transition: transform 0.05s ease, opacity 0.2s ease;
+}
+
+.cbtn:hover { opacity: 0.95; }
+.cbtn:active { transform: scale(0.98); }
+
+.cbtn--google { background: #1a73e8; }
+.cbtn--secondary { background: #666; }
+
+/* Responsivo: coloca botões lado-a-lado em telas maiores */
+@media (min-width: 480px) {
+  .confirmacao__actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+  .cbtn { min-width: 240px; }
+}
+
