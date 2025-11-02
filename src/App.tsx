@@ -5,21 +5,25 @@ import Agendar from "./components/pages/Agendar";
 import Confirmacao from "./components/pages/Confirmacao";
 import Admin from "./components/pages/Admin";
 import AdminListar from "./components/pages/AdminListar";
-
-
+import AdminAgendamentos from "./components/pages/AdminAgendamentos";
 
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        {}
-        <Route path="/vitrine" element={<Vitrine />} /> {}
+        <Route path="/vitrine" element={<Vitrine />} />
         <Route path="/agendar" element={<Agendar />} />
-        {}
-        <Route path="/confirmacao" element={<Confirmacao />} /> {}
-        <Route path="/admin" element={<Admin />} /> {}
-        <Route path="/admin-listar" element={<AdminListar />} /> {}
+        <Route path="/confirmacao" element={<Confirmacao />} />
+
+        {/* Painel principal do admin (o que você já tinha) */}
+        <Route path="/admin" element={<Admin />} />
+
+        {/* Sua tela existente de listagem de itens */}
+        <Route path="/admin-listar" element={<AdminListar />} />
+
+        {/* NOVA rota para a lista de agendamentos */}
+        <Route path="/admin/agendamentos" element={<AdminAgendamentos />} />
       </Routes>
     </Router>
   );

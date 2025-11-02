@@ -26,6 +26,32 @@
   color: var(--admin-muted);
 }
 
+/* ===== NOVO: barra do topo com ações à direita ===== */
+.admin-header__bar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-header__left{
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header__right{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto; /* garante que fique colado à direita */
+}
+
+@media (max-width: 576px){
+  .admin-header__bar{ flex-direction: column; align-items: stretch; gap: 8px; }
+  .admin-header__right{ justify-content: flex-start; }
+}
+/* ===== FIM NOVO ===== */
+
 /* Seções */
 .admin-section {
   margin-bottom: 3rem;

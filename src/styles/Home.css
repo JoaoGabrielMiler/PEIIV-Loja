@@ -68,10 +68,10 @@
 .banner h2{ color:#fff; }
 .banner p{ color:#e8e8e8; }
 
-/* Footer */
+
 .app-footer{ font-size:.9rem; }
 
-/* Botão Admin discreto no rodapé (canto inferior direito) */
+
 .admin-foot-gear{
   position:absolute;
   right:14px;

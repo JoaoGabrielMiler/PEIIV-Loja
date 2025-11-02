@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { db, storage } from "../../firebaseConfig";
 import { collection, addDoc, setDoc, doc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import "../../styles/Admin.css";
 
 export default function Admin() {
@@ -29,8 +29,14 @@ export default function Admin() {
     setMensagem("");
 
     try {
-      const imagemRef = ref(storage, `produtos/${imagem.name}`);
-      await uploadBytes(imagemRef, imagem);
+      const imagemRef = ref(storage, `produtos/${Date.now()}-${imagem.name}`);
+      const metadata = { contentType: imagem.type };
+
+      const uploadTask = uploadBytesResumable(imagemRef, imagem, metadata);
+      await new Promise<void>((resolve, reject) => {
+        uploadTask.on("state_changed", null, (error) => reject(error), () => resolve());
+      });
+
       const urlImagem = await getDownloadURL(imagemRef);
 
       await addDoc(collection(db, "produtos"), {
@@ -49,7 +55,7 @@ export default function Admin() {
       setImagem(null);
       setMensagem("✅ Produto cadastrado com sucesso!");
     } catch (error) {
-      console.error("Erro:", error);
+      console.error("Erro geral:", error);
       setMensagem("❌ Erro ao salvar produto.");
     } finally {
       setEnviando(false);
@@ -88,9 +94,22 @@ export default function Admin() {
     <div className="admin-container d-flex flex-column min-vh-100">
       {/* HEADER */}
       <header className="admin-header py-4">
-        <div className="container text-center">
-          <h1 className="admin-title display-5">Painel do Administrador</h1>
-          <p className="admin-subtitle mb-0">Gerencie seus produtos e horários</p>
+        <div className="container">
+          <div className="admin-header__bar">
+            <div className="admin-header__left">
+              <h1 className="admin-title display-5">Painel do Administrador</h1>
+              <p className="admin-subtitle mb-0">Gerencie seus produtos e horários</p>
+            </div>
+
+            <div className="admin-header__right">
+              <Link to="/admin-listar" className="btn btn-ghost">
+                👁️ Visualizar Itens
+              </Link>
+              <Link to="/admin/agendamentos" className="btn btn-ghost">
+                📅 Ver Agendamentos
+              </Link>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -252,10 +271,7 @@ export default function Admin() {
                 {horas.length > 0 && (
                   <ul className="list-group mb-3 hours-list" aria-label="Horários adicionados">
                     {horas.map((h) => (
-                      <li
-                        key={h}
-                        className="list-group-item d-flex justify-content-between align-items-center"
-                      >
+                      <li key={h} className="list-group-item d-flex justify-content-between align-items-center">
                         <span>{h}</span>
                         <button
                           type="button"
@@ -281,12 +297,7 @@ export default function Admin() {
 
         {/* AÇÕES FINAIS */}
         <div className="text-center mt-4">
-          <Link to="/admin-listar" className="btn btn-ghost mx-2">
-            👁️ Visualizar Itens
-          </Link>
-          <Link to="/" className="btn btn-ghost mx-2">
-            ← Voltar
-          </Link>
+          <Link to="/" className="btn btn-ghost mx-2">← Voltar</Link>
         </div>
       </main>
 

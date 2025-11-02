@@ -1,7 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { db } from "../../firebaseConfig";
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  runTransaction,
+  serverTimestamp,
+} from "firebase/firestore";
 import "../../styles/Agendar.css";
 
 export default function Agendar() {
@@ -35,43 +44,64 @@ export default function Agendar() {
   const endPress = () => clearTimeout(pressTimer.current!);
   // --------
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setEnviando(true);
+  // Carrega horários do dia e remove os que já estão ocupados
+  const buscarHorarios = async (dataSelecionada: string) => {
     try {
-      await addDoc(collection(db, "agendamentos"), {
-        nome,
-        telefone,
-        data,
-        hora,
-        criadoEm: new Date(),
-      });
-      setNome(""); setTelefone(""); setData(""); setHora("");
-      navigate("/confirmacao", { state: { nome, telefone, data, hora } });
+      // 1) horários base definidos no Admin (doc: horariosDisponiveis/<YYYY-MM-DD>)
+      const baseRef = doc(db, "horariosDisponiveis", dataSelecionada);
+      const baseSnap = await getDoc(baseRef);
+      const baseHoras: string[] = baseSnap.exists() ? (baseSnap.data().horas || []) : [];
+
+      // 2) horários já reservados nessa data (coleção agendamentos)
+      const q = query(collection(db, "agendamentos"), where("data", "==", dataSelecionada));
+      const snap = await getDocs(q);
+      const ocupados = new Set(snap.docs.map((d) => (d.data() as any).hora));
+
+      // 3) livres = base - ocupados
+      const livres = baseHoras.filter((h) => !ocupados.has(h)).sort();
+      setHorariosDisponiveis(livres);
     } catch (error) {
-      console.error("Erro ao agendar:", error);
-      alert("❌ Ocorreu um erro ao salvar o agendamento.");
-    } finally {
-      setEnviando(false);
+      console.error("Erro ao buscar horários:", error);
+      setHorariosDisponiveis([]);
     }
   };
 
-  const buscarHorarios = async (dataSelecionada: string) => {
+  // Submit com transação + ID único por data+hora
+  const confirmarAgendamento = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nome || !telefone || !data || !hora) {
+      alert("Preencha nome, telefone, data e hora.");
+      return;
+    }
+
+    setEnviando(true);
     try {
-      const docRef = doc(db, "storeSlots", dataSelecionada);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const dados = docSnap.data();
-        const slots = dados.slots ? Object.entries(dados.slots) : [];
-        const horariosLivres = slots
-          .filter(([_, valor]: any) => valor.booked < valor.capacity)
-          .map(([hora]) => hora as string);
-        setHorariosDisponiveis(horariosLivres);
-      } else {
-        setHorariosDisponiveis([]);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar horários:", error);
+      const horaSafe = hora.replace(":", ""); // "1300"
+      const docId = `ag_${data}_${horaSafe}`; // 1 slot por data+hora
+      const ref = doc(db, "agendamentos", docId);
+
+      await runTransaction(db, async (tx) => {
+        const current = await tx.get(ref);
+        if (current.exists()) {
+          throw new Error("Esse horário acabou de ser reservado. Escolha outro.");
+        }
+        tx.set(ref, {
+          nome,
+          telefone,
+          data,       // "YYYY-MM-DD"
+          hora,       // "HH:mm"
+          criadoEm: serverTimestamp(),
+        });
+      });
+
+      // Limpa e vai para a confirmação (a confirmação só exibe; não grava nada)
+      const payload = { nome, telefone, data, hora };
+      setNome(""); setTelefone(""); setData(""); setHora("");
+      navigate("/confirmacao", { state: payload });
+    } catch (error: any) {
+      alert(error?.message || "❌ Não foi possível reservar este horário.");
+    } finally {
+      setEnviando(false);
     }
   };
 
@@ -107,7 +137,7 @@ export default function Agendar() {
 
           <div className="card agendar-card">
             <div className="card-body">
-              <form className="agendar-form mx-auto" onSubmit={handleSubmit}>
+              <form className="agendar-form mx-auto" onSubmit={confirmarAgendamento}>
                 <h3 className="h5 mb-3">Seus dados</h3>
 
                 <div className="mb-3">
@@ -150,7 +180,8 @@ export default function Agendar() {
                       onChange={(e) => {
                         const novaData = e.target.value;
                         setData(novaData);
-                        buscarHorarios(novaData);
+                        setHora("");               // limpa hora ao trocar a data
+                        buscarHorarios(novaData);  // carrega horários livres
                       }}
                     />
                     <div className="form-text input-hint">
