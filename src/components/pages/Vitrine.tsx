@@ -4,6 +4,8 @@ import { db } from "../../firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import "../../styles/Vitrine.css";
 
+import { toggleItem, isInSacola, countSacola } from "../../utils/sacola";
+
 interface Produto {
   id: string;
   nome: string;
@@ -50,6 +52,7 @@ export default function Vitrine() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoriaAtiva, setCategoriaAtiva] = useState<string>("Todos");
+  const [sacolaQtd, setSacolaQtd] = useState<number>(0);
   const navigate = useNavigate();
 
   // ---- Admin escondido
@@ -70,6 +73,9 @@ export default function Vitrine() {
   // ----
 
   useEffect(() => {
+    // contador inicial da sacola
+    setSacolaQtd(countSacola());
+
     const fetchProdutos = async () => {
       try {
         const usarMock = new URLSearchParams(window.location.search).get("mock") === "1";
@@ -77,13 +83,13 @@ export default function Vitrine() {
         const lista = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Produto[];
 
         if (usarMock || lista.length === 0) {
-          setProdutos(MOCK_PRODUTOS);      // 👉 usa 9 cards mock
+          setProdutos(MOCK_PRODUTOS);
         } else {
           setProdutos(lista);
         }
       } catch (e) {
         console.error("Erro ao buscar produtos:", e);
-        setProdutos(MOCK_PRODUTOS);        // 👉 em erro, usa mock para testar layout
+        setProdutos(MOCK_PRODUTOS);
       } finally {
         setLoading(false);
       }
@@ -91,7 +97,7 @@ export default function Vitrine() {
     fetchProdutos();
   }, []);
 
-  // CATEGORIAS FIXAS (você pode editar aqui)
+  // CATEGORIAS FIXAS
   const CATEGORIAS_FIXAS = [
     "Todos",
     "Vestido",
@@ -103,7 +109,6 @@ export default function Vitrine() {
     "Macacão",
   ];
 
-  // categorias detectadas dos produtos (para complementar as fixas)
   const categoriasDinamicas = useMemo(() => {
     const s = new Set<string>();
     produtos.forEach((p) => p.categoria && s.add(p.categoria));
@@ -116,46 +121,65 @@ export default function Vitrine() {
     return Array.from(set);
   }, [CATEGORIAS_FIXAS, categoriasDinamicas]);
 
-  const filtrados = useMemo(() => {
-    return produtos.filter((p) =>
-      categoriaAtiva === "Todos" ? true : p.categoria === categoriaAtiva
-    );
-  }, [produtos, categoriaAtiva]);
+  const filtrados = useMemo(
+    () => produtos.filter((p) => (categoriaAtiva === "Todos" ? true : p.categoria === categoriaAtiva)),
+    [produtos, categoriaAtiva]
+  );
+
+  // Toggle na sacola
+  const handleToggleReserva = (p: Produto) => {
+    toggleItem({
+      produtoId: p.id,
+      nome: p.nome,
+      imagem: p.imagem,
+      categoria: p.categoria,
+    });
+    setSacolaQtd(countSacola()); // re-render e atualiza label dos botões
+  };
 
   return (
     <div className="vitrine-container min-vh-100 d-flex flex-column">
-      {/* Header */}
-      <header className="bg-light shadow-sm py-3">
-        <div className="container text-center">
-          <h1
-            className="fw-bold text-primary page-title"
-            onDoubleClick={handleAdminClick}
-            onMouseDown={() => {
-              clearTimeout(pressTimer.current!);
-              pressTimer.current = window.setTimeout(() => handleAdminClick(), 900);
-            }}
-            onMouseUp={() => clearTimeout(pressTimer.current!)}
-            onTouchStart={() => {
-              clearTimeout(pressTimer.current!);
-              pressTimer.current = window.setTimeout(() => handleAdminClick(), 900);
-            }}
-            onTouchEnd={() => clearTimeout(pressTimer.current!)}
-            title="Duplo clique ou segure para admin"
-          >
-            Vitrine
-          </h1>
-          <p className="text-muted mb-0">Confira nossos produtos disponíveis</p>
-        </div>
-      </header>
+<header className="bg-light shadow-sm py-3">
+  <div className="container position-relative text-center">
+    {/* CTA no canto direito */}
+    <Link
+      to="/agendar"
+      className="btn btn-primary btn-sm header-cta"
+      aria-label={`Agendar e levar peças (${sacolaQtd})`}
+      title="Agendar e levar peças"
+    >
+      Agendar e levar peças ({sacolaQtd})
+    </Link>
+
+    <h1
+      className="fw-bold text-primary page-title"
+      onDoubleClick={handleAdminClick}
+      onMouseDown={() => {
+        clearTimeout(pressTimer.current!);
+        pressTimer.current = window.setTimeout(() => handleAdminClick(), 900);
+      }}
+      onMouseUp={() => clearTimeout(pressTimer.current!)}
+      onTouchStart={() => {
+        clearTimeout(pressTimer.current!);
+        pressTimer.current = window.setTimeout(() => handleAdminClick(), 900);
+      }}
+      onTouchEnd={() => clearTimeout(pressTimer.current!)}
+      title="Duplo clique ou segure para admin"
+    >
+      Vitrine
+    </h1>
+    <p className="text-muted mb-0">Confira nossos produtos disponíveis</p>
+  </div>
+</header>
+
 
       {/* Área central */}
       <section className="banner flex-grow-1">
         <div className="container-xxl py-5">
           <div className="hero-card p-3 p-sm-4 rounded-4">
-            {/* Barra seletora (chips) — VERSÃO COM RÁDIO NATIVO */}
+            {/* Barra seletora (chips) */}
             <fieldset className="chip-fieldset">
               <legend className="visually-hidden">Filtrar por estilo</legend>
-
               <div className="chip-bar" role="group" aria-label="Opções de estilo">
                 {categorias.map((cat) => {
                   const id = `chip-${cat.toLowerCase().replace(/\s+/g, "-")}`;
@@ -204,27 +228,53 @@ export default function Vitrine() {
               </div>
             ) : (
               <div className="row g-4 mt-2">
-                {filtrados.map((p) => (
-                  <div className="col-12 col-sm-6 col-md-6 col-xl-4" key={p.id}>
-                    <div className="card product-card h-100 shadow-sm">
-                      <div className="product-img">
-                        <img
-                          src={p.imagem || PLACEHOLDER}
-                          alt={p.nome}
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = PLACEHOLDER;
-                          }}
-                        />
-                      </div>
-                      <div className="card-body text-center">
-                        <h5 className="card-title mb-1">{p.nome}</h5>
-                        <p className="card-subtitle text-light-emphasis small">
-                          {p.categoria || " "}
-                        </p>
+                {filtrados.map((p) => {
+                  const reservado = isInSacola(p.id);
+                  return (
+                    <div className="col-12 col-sm-6 col-md-6 col-xl-4" key={p.id}>
+                      <div className="card product-card h-100 shadow-sm">
+                        <div className="product-img">
+                          <img
+                            src={p.imagem || PLACEHOLDER}
+                            alt={p.nome}
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = PLACEHOLDER;
+                            }}
+                          />
+                        </div>
+                        <div className="card-body text-center">
+                          <h5 className="card-title mb-1">{p.nome}</h5>
+                          <p className="card-subtitle text-light-emphasis small">
+                            {p.categoria || " "}
+                          </p>
+
+                          {(() => {
+                            const cbId = `res-${p.id}`; // id único por produto
+                            return (
+                              <>
+                                <input
+                                  id={cbId}
+                                  type="checkbox"
+                                  className="reserve-input"
+                                  checked={reservado}
+                                  onChange={() => handleToggleReserva(p)}
+                                />
+                                <label
+                                  htmlFor={cbId}
+                                  className={`reserve-label btn ${reservado ? "btn-success" : "btn-outline-primary"} btn-sm mt-2`}
+                                  title={reservado ? "Remover da sacola de prova" : "Reservar para provar"}
+                                >
+                                  {reservado ? "Reservado ✓" : "Reservar para provar"}
+                                </label>
+                              </>
+                            );
+                          })()}
+
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -234,7 +284,9 @@ export default function Vitrine() {
       {/* Footer */}
       <footer className="app-footer bg-dark text-light text-center py-3 mt-auto position-relative">
         <div className="container">
-          <Link to="/agendar" className="btn btn-outline-light mx-2">Agendar horário</Link>
+          <Link to="/agendar" className="btn btn-outline-light mx-2">
+            Agendar horário ({sacolaQtd})
+          </Link>
           <Link to="/" className="btn btn-outline-light mx-2">Voltar</Link>
         </div>
         <button className="admin-foot-gear" onClick={handleAdminClick} aria-label="Admin" title="Admin">⚙️</button>

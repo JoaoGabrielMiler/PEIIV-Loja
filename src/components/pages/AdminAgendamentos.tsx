@@ -12,12 +12,23 @@ import {
 } from "firebase/firestore";
 import "../../styles/AdminAgendamentos.css";
 
+type ItemProva = {
+  produtoId: string;
+  nome: string;
+  imagem?: string;
+  categoria?: string;
+  tamanho?: string;
+  obs?: string;
+  qtd?: number;
+};
+
 type Agendamento = {
   id: string;
   nome: string;
   telefone: string;
   data: string; // "YYYY-MM-DD"
   hora: string; // "HH:mm"
+  itens?: ItemProva[];
 };
 
 function todayStr() {
@@ -77,7 +88,8 @@ export default function AdminAgendamentos() {
         it.nome?.toLowerCase().includes(term) ||
         it.telefone?.toLowerCase().includes(term) ||
         it.data?.includes(term) ||
-        it.hora?.includes(term)
+        it.hora?.includes(term) ||
+        (it.itens || []).some((p) => p.nome?.toLowerCase().includes(term))
     );
   }, [items, busca]);
 
@@ -120,13 +132,14 @@ export default function AdminAgendamentos() {
               <th>Hora</th>
               <th>Nome</th>
               <th>Telefone</th>
+              <th>Itens</th>
               <th>Ação</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={5} className="admin__empty">Nenhum agendamento encontrado.</td>
+                <td colSpan={6} className="admin__empty">Nenhum agendamento encontrado.</td>
               </tr>
             ) : (
               filtered.map((it) => (
@@ -135,6 +148,21 @@ export default function AdminAgendamentos() {
                   <td>{it.hora}</td>
                   <td>{it.nome}</td>
                   <td>{it.telefone}</td>
+                  <td>
+                    <div className="items">
+                      {(it.itens || []).map((p) => (
+                        <div key={p.produtoId} className="item-chip" title={p.nome}>
+                          {p.imagem ? (
+                            <img src={p.imagem} alt={p.nome} className="item-thumb" />
+                          ) : (
+                            <span className="item-initials">{(p.nome || "?").slice(0,1)}</span>
+                          )}
+                          <span className="item-name">{p.nome}</span>
+                        </div>
+                      ))}
+                      {(it.itens || []).length === 0 && <span className="text-muted">—</span>}
+                    </div>
+                  </td>
                   <td>
                     <button
                       className="admin__btn-del"

@@ -12,6 +12,12 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import "../../styles/Agendar.css";
+import {
+  getSacola,
+  removeItem as sacolaRemove,
+  clearSacola,
+  type ItemProva,
+} from "../../utils/sacola";
 
 export default function Agendar() {
   const [nome, setNome] = useState("");
@@ -20,6 +26,7 @@ export default function Agendar() {
   const [hora, setHora] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
+  const [itens, setItens] = useState<ItemProva[]>([]);
   const navigate = useNavigate();
 
   // -------- Admin escondido
@@ -44,20 +51,25 @@ export default function Agendar() {
   const endPress = () => clearTimeout(pressTimer.current!);
   // --------
 
+  // Carrega sacola ao abrir
+  useEffect(() => {
+    setItens(getSacola());
+  }, []);
+
   // Carrega horários do dia e remove os que já estão ocupados
   const buscarHorarios = async (dataSelecionada: string) => {
     try {
-      // 1) horários base definidos no Admin (doc: horariosDisponiveis/<YYYY-MM-DD>)
+      // 1) base do admin
       const baseRef = doc(db, "horariosDisponiveis", dataSelecionada);
       const baseSnap = await getDoc(baseRef);
       const baseHoras: string[] = baseSnap.exists() ? (baseSnap.data().horas || []) : [];
 
-      // 2) horários já reservados nessa data (coleção agendamentos)
+      // 2) já reservados nessa data
       const q = query(collection(db, "agendamentos"), where("data", "==", dataSelecionada));
       const snap = await getDocs(q);
       const ocupados = new Set(snap.docs.map((d) => (d.data() as any).hora));
 
-      // 3) livres = base - ocupados
+      // 3) livres
       const livres = baseHoras.filter((h) => !ocupados.has(h)).sort();
       setHorariosDisponiveis(livres);
     } catch (error) {
@@ -66,11 +78,21 @@ export default function Agendar() {
     }
   };
 
-  // Submit com transação + ID único por data+hora
+  // Remover item da lista na própria tela
+  const removerItemLocal = (produtoId: string) => {
+    sacolaRemove(produtoId);
+    setItens(getSacola());
+  };
+
+  // Submit com transação + ID único por data+hora + itens da sacola
   const confirmarAgendamento = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome || !telefone || !data || !hora) {
       alert("Preencha nome, telefone, data e hora.");
+      return;
+    }
+    if (itens.length > 5) {
+      alert("Você só pode selecionar até 5 peças para provar.");
       return;
     }
 
@@ -90,12 +112,15 @@ export default function Agendar() {
           telefone,
           data,       // "YYYY-MM-DD"
           hora,       // "HH:mm"
+          itens,      // <<<<<< guarda a sacola junto no doc
           criadoEm: serverTimestamp(),
         });
       });
 
-      // Limpa e vai para a confirmação (a confirmação só exibe; não grava nada)
+      // Limpa sacola e vai para a confirmação
       const payload = { nome, telefone, data, hora };
+      clearSacola();
+      setItens([]);
       setNome(""); setTelefone(""); setData(""); setHora("");
       navigate("/confirmacao", { state: payload });
     } catch (error: any) {
@@ -180,8 +205,8 @@ export default function Agendar() {
                       onChange={(e) => {
                         const novaData = e.target.value;
                         setData(novaData);
-                        setHora("");               // limpa hora ao trocar a data
-                        buscarHorarios(novaData);  // carrega horários livres
+                        setHora("");
+                        buscarHorarios(novaData);
                       }}
                     />
                     <div className="form-text input-hint">
@@ -214,6 +239,31 @@ export default function Agendar() {
                     </select>
                   </div>
                 </div>
+
+                {/* Itens selecionados para provar */}
+                <h3 className="h5 mt-4 mb-3">Peças selecionadas para provar</h3>
+                {itens.length === 0 ? (
+                  <p className="text-muted">Nenhuma peça selecionada na vitrine.</p>
+                ) : (
+                  <ul className="list-group mb-3">
+                    {itens.map((it) => (
+                      <li key={it.produtoId} className="list-group-item d-flex align-items-center justify-content-between">
+                        <div className="d-flex align-items-center gap-2">
+                          {it.imagem && (
+                            <img src={it.imagem} alt={it.nome} width={48} height={48} style={{ borderRadius: 8, objectFit: "cover" }} />
+                          )}
+                          <div>
+                            <div className="fw-semibold">{it.nome}</div>
+                            {it.categoria && <small className="text-muted">{it.categoria}</small>}
+                          </div>
+                        </div>
+                        <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removerItemLocal(it.produtoId)}>
+                          Remover
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
                 <button type="submit" className="btn btn-gradient w-100 mt-2" disabled={enviando}>
                   {enviando ? (

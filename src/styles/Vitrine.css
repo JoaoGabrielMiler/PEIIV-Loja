@@ -1,11 +1,5 @@
-/* Se o tema NÃO estiver global, descomente e ajuste o caminho
-@import "../../styles/theme.css";
-*/
-
-/* fundo padrão da página */
 .vitrine-container { background-color: #f8f9fa; }
 
-/* ===================== Chips (rádio nativo) ===================== */
 .chip-fieldset { border: 0; padding: 0; margin: 0 0 .75rem; }
 
 .chip-bar{
@@ -102,4 +96,70 @@
 @keyframes shimmer{
   from{ background-position: 200% 0; }
   to{   background-position: 0 0; }
+}
+/* Botão de reservar (toggle) */
+.reserve-btn{
+  border-radius: 999px;
+  padding: .4rem .75rem;
+  font-weight: 600;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.reserve-btn:active{ transform: scale(.98); }
+
+/* estado pressionado (aria) – funciona com btn-success também */
+.reserve-btn[aria-pressed="true"]{
+  box-shadow: 0 8px 18px rgba(16, 185, 129, .25); /* verde suave */
+}
+
+/* foco visível acessível */
+.reserve-btn:focus-visible{
+  outline: 2px solid rgba(255,255,255,.9);
+  outline-offset: 2px;
+}
+/* Toggle nativo (checkbox + label como botão) */
+.reserve-input{
+  position: absolute;
+  opacity: 0;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0; padding: 0; margin: 0;
+}
+
+.reserve-label{
+  border-radius: 999px;
+  padding: .4rem .75rem;
+  font-weight: 600;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.reserve-label:active{ transform: scale(.98); }
+
+/* Foco acessível quando o input recebe foco */
+.reserve-input:focus-visible + .reserve-label{
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* realce quando marcado (mesmo efeito que antes) */
+.reserve-input:checked + .reserve-label{
+  box-shadow: 0 8px 18px rgba(16,185,129,.25);
+}
+
+/* CTA do header fixo à direita */
+.header-cta{
+  position: absolute;
+  right: 0;
+  top: .75rem;      /* ajuste fino vertical */
+  z-index: 1;       /* garante que fique acima do conteúdo do header */
+}
+
+/* No mobile, empilha abaixo do título */
+@media (max-width: 576px){
+  .header-cta{
+    position: static;
+    display: inline-flex;
+    margin-top: .5rem;
+  }
 }

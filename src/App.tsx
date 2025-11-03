@@ -15,14 +15,8 @@ export default function App() {
         <Route path="/vitrine" element={<Vitrine />} />
         <Route path="/agendar" element={<Agendar />} />
         <Route path="/confirmacao" element={<Confirmacao />} />
-
-        {/* Painel principal do admin (o que você já tinha) */}
         <Route path="/admin" element={<Admin />} />
-
-        {/* Sua tela existente de listagem de itens */}
         <Route path="/admin-listar" element={<AdminListar />} />
-
-        {/* NOVA rota para a lista de agendamentos */}
         <Route path="/admin/agendamentos" element={<AdminAgendamentos />} />
       </Routes>
     </Router>
