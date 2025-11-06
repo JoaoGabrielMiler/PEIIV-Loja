@@ -36,15 +36,25 @@ Notificações e integração com Google Agenda
 
 🖼️ Telas 
 
-|          Home             |          Vitrine               |          Agendar Horario               |          Painel do ADM           | |          Painel de Cadastro                | |  Painel de Agendamentos concluídos  | 
-| :------------------------:| :-----------------------------:| :-------------------------------------:| :------------------------------: | | :----------------------------------------: | | :---------------------------------: | 
-| ![Início](./img/home.png) | ![Catálogo](./img/Vitrine.png) | ![Favoritos](./img/AgendarHorario.png) | ![Detalhes](./img/PainelADM.png) | | ![Detalhes](./img/ProdutosCadastrados.png) | | ![Detalhes](./img/Agendamentos.png) |
-	
-	
-	
+|          Home             |      
+| ![Início](./img/home.png) |
+---
+|         Vitrine              |
+![Catálogo](./img/Vitrine.png) |
+---
+|       Agendar Horario               |
+|![Favoritos](./img/AgendarHorario.png) |
+---
+|         Painel do ADM           |
+|![Detalhes](./img/PainelADM.png) |
+---
+|          Painel de Cadastro                |
+| ![Detalhes](./img/ProdutosCadastrados.png) |
+---
+|  Painel de Agendamentos concluídos  | 
+| ![Detalhes](./img/Agendamentos.png) |
 
-Substitua as imagens acima por capturas reais em ./design/.
-
+---
 🗂️ Estrutura de Pastas
 PODER_MARCAR/
 │
