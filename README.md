@@ -55,22 +55,24 @@ Notificações e integração com Google Agenda
  ![Detalhes](./img/Agendamentos.png) 
 
 ---
-🗂️ Estrutura de Pastas
-PODER_MARCAR/
-│
+<details>
+  <summary><b>Estrutura de Pastas</b></summary>
+
+<pre>
+(PODER_MARCAR/
 ├── .config/
 ├── node_modules/
 ├── public/
 ├── src/
 │   ├── components/
-│   │   └── pages/
-│   │       ├── Admin.tsx
-│   │       ├── AdminAgendamentos.tsx
-│   │       ├── AdminListar.tsx
-│   │       ├── Agendar.tsx
-│   │       ├── Confirmacao.tsx
-│   │       ├── Home.tsx
-│   │       └── Vitrine.tsx
+│   ├── pages/
+│   │   ├── Admin.tsx
+│   │   ├── AdminAgendamentos.tsx
+│   │   ├── AdminListar.tsx
+│   │   ├── Agendar.tsx
+│   │   ├── Confirmacao.tsx
+│   │   ├── Home.tsx
+│   │   └── Vitrine.tsx
 │   ├── styles/
 │   │   ├── Admin.css
 │   │   ├── AdminAgendamentos.css
@@ -97,6 +99,9 @@ PODER_MARCAR/
 ├── tsconfig.json
 ├── tsconfig.node.json
 └── vite.config.ts
+)
+</pre>
+</details>
 
 ⚙️ Instalação e Execução
 # Clone o repositório
