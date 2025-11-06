@@ -36,23 +36,23 @@ Notificações e integração com Google Agenda
 
 🖼️ Telas 
 
-|          Home             |      
-| ![Início](./img/home.png) |
+|          Home                  
+ ![Início](./img/home.png) 
 ---
-|         Vitrine              |
-![Catálogo](./img/Vitrine.png) |
+|         Vitrine              
+![Catálogo](./img/Vitrine.png) 
 ---
-|       Agendar Horario               |
-|![Favoritos](./img/AgendarHorario.png) |
+|       Agendar Horario               
+![Favoritos](./img/AgendarHorario.png) 
 ---
-|         Painel do ADM           |
-|![Detalhes](./img/PainelADM.png) |
+|         Painel do ADM           
+|![Detalhes](./img/PainelADM.png) 
 ---
-|          Painel de Cadastro                |
-| ![Detalhes](./img/ProdutosCadastrados.png) |
+|          Painel de Cadastro                
+ ![Detalhes](./img/ProdutosCadastrados.png) 
 ---
-|  Painel de Agendamentos concluídos  | 
-| ![Detalhes](./img/Agendamentos.png) |
+|  Painel de Agendamentos concluídos  
+ ![Detalhes](./img/Agendamentos.png) 
 
 ---
 🗂️ Estrutura de Pastas
