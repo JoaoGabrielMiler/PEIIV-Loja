@@ -6,6 +6,7 @@ import Confirmacao from "./components/pages/Confirmacao";
 import Admin from "./components/pages/Admin";
 import AdminListar from "./components/pages/AdminListar";
 import AdminAgendamentos from "./components/pages/AdminAgendamentos";
+import VitrinePromocoes from "./components/pages/VitrinePromocoes";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin-listar" element={<AdminListar />} />
         <Route path="/admin/agendamentos" element={<AdminAgendamentos />} />
+        <Route path="/promocoes" element={<VitrinePromocoes />} />
       </Routes>
     </Router>
   );

@@ -1,25 +1,18 @@
-:root{
-  --brand-1:#4f46e5; /* indigo */
-  --brand-2:#0ea5e9; /* sky */
-  --text-dark:#0f172a;
-}
+:root{ --brand-1:#4f46e5; --brand-2:#0ea5e9; --text-dark:#0f172a; }
 
-.home-container{
-  font-family:'Poppins',sans-serif;
-  background-color:#f8f9fa;
-  position:relative;
-}
+.home-container{ position:relative; }
+
+.home-title{ cursor: default; }
+.home-title:active{ transform: scale(.995); }
 
 /* Banner com degradê animado bem sutil */
 .banner{
-  /* fallback estático */
   background: linear-gradient(135deg, var(--brand-2) 0%, #6610f2 100%);
   padding: 80px 20px;
   position:relative;
   overflow:hidden;
 }
 .banner::before{
-  /* animação de luz suave */
   content:"";
   position:absolute; inset:-20%;
   background:
@@ -43,34 +36,56 @@
   color:#fff;
 }
 
-/* Botões com micro-interação */
+/* Botões padronizados */
 .btn{
+  -webkit-tap-highlight-color: transparent;
+  display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+  padding:.75rem 1.15rem;
+  border-radius:12px;
+  font-weight:600; line-height:1;
+  text-decoration:none; cursor:pointer;
+  border:1.5px solid transparent;
+  color:#fff;
   transform: translateZ(0);
-  transition: transform .12s ease, box-shadow .12s ease;
-}
-.btn:focus-visible{
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease, border-color .12s ease, background .12s ease;
 }
 .btn:hover{
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(0,0,0,.18);
 }
+.btn:focus-visible{
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.btn:disabled{
+  opacity:.6;
+  pointer-events:none;
+}
+
+/* Primário */
 .btn-primary{
   background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
   border: none;
+  color:#fff;
 }
-.btn-primary:hover{
-  filter: brightness(1.05);
+.btn-primary:hover{ filter: brightness(1.05); }
+
+/* Secundário (outline) */
+.btn-secondary{
+  background: transparent;
+  color:#fff;
+  border-color: rgba(255,255,255,.45);
+}
+.btn-secondary:hover{
+  border-color: rgba(255,255,255,.7);
+  background: rgba(255,255,255,.06);
 }
 
 /* Tipografia do hero */
 .banner h2{ color:#fff; }
 .banner p{ color:#e8e8e8; }
 
-
 .app-footer{ font-size:.9rem; }
-
 
 .admin-foot-gear{
   position:absolute;
@@ -89,7 +104,3 @@
   opacity: .8;
   transform: rotate(15deg) scale(1.05);
 }
-
-/* (opcional) Título com sutil efeito ao focar */
-.home-title{ cursor: default; }
-.home-title:active{ transform: scale(.995); }

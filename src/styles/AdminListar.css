@@ -117,3 +117,21 @@
   background: #0f172a;
   color: #cbd5e1;
 }
+
+/* ====== edição inline (preço) ====== */
+.inline-edit { text-align: left; margin-bottom: .5rem; }
+.inline-edit__label { font-size: .85rem; color: #6b7280; margin-bottom: .25rem; display:block; }
+.inline-edit__input { border-radius: .6rem; }
+
+/* ====== chips de horários ====== */
+.chips { display:flex; flex-wrap:wrap; gap:.5rem; }
+.chip {
+  display:inline-flex; align-items:center; gap:.35rem;
+  background:#eef2ff; border:1px solid #c7d2fe; color:#1f2937;
+  padding:.25rem .5rem; border-radius:999px; font-size:.9rem;
+}
+.chip__x {
+  appearance:none; border:0; background:transparent;
+  font-size:1rem; line-height:1; cursor:pointer; color:#ef4444;
+}
+.chip__x:hover { color:#b91c1c; }
