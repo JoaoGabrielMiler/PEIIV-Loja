@@ -146,7 +146,8 @@ export default function VitrinePromocoes() {
   };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") handleAdminClick();
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a")
+        handleAdminClick();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -157,7 +158,8 @@ export default function VitrinePromocoes() {
 
     const fetchPromos = async () => {
       try {
-        const usarMock = new URLSearchParams(window.location.search).get("mock") === "1";
+        const usarMock =
+          new URLSearchParams(window.location.search).get("mock") === "1";
         if (usarMock) {
           setItens(MOCK_PROMOS);
           return;
@@ -170,9 +172,11 @@ export default function VitrinePromocoes() {
           where("expiraEm", ">=", agora)
         );
         const snap = await getDocs(q);
-        const lista = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Promocao[];
+        const lista = snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        })) as Promocao[];
 
-        // se Firestore estiver vazio, usa mock para visualização
         if (lista.length === 0) {
           setItens(MOCK_PROMOS);
         } else {
@@ -196,13 +200,16 @@ export default function VitrinePromocoes() {
   }, [itens]);
 
   const filtrados = useMemo(
-    () => itens.filter((p) => (categoriaAtiva === "Todos" ? true : p.categoria === categoriaAtiva)),
+    () =>
+      itens.filter((p) =>
+        categoriaAtiva === "Todos" ? true : p.categoria === categoriaAtiva
+      ),
     [itens, categoriaAtiva]
   );
 
   const diasRestantes = (exp?: any) => {
     const d: Date | null =
-      !exp ? null : exp.toDate ? exp.toDate() : (exp instanceof Date ? exp : null);
+      !exp ? null : exp.toDate ? exp.toDate() : exp instanceof Date ? exp : null;
     if (!d) return null;
     const ms = d.getTime() - Date.now();
     return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
@@ -210,42 +217,57 @@ export default function VitrinePromocoes() {
 
   return (
     <div className="vitrine-container min-vh-100 d-flex flex-column">
+      {/* HEADER */}
       <header className="bg-light shadow-sm py-3">
         <div className="container position-relative text-center">
-          <Link
-            to="/agendar"
-            className="btn btn-primary btn-sm header-cta"
-            aria-label={`Agendar e levar peças (${sacolaQtd})`}
-            title="Agendar e levar peças"
-          >
-            Agendar e levar peças ({sacolaQtd})
-          </Link>
-
           <h1
             className="fw-bold text-danger page-title"
             onDoubleClick={handleAdminClick}
             onMouseDown={() => {
               clearTimeout(pressTimer.current!);
-              pressTimer.current = window.setTimeout(() => handleAdminClick(), 900);
+              pressTimer.current = window.setTimeout(
+                () => handleAdminClick(),
+                900
+              );
             }}
             onMouseUp={() => clearTimeout(pressTimer.current!)}
             onTouchStart={() => {
               clearTimeout(pressTimer.current!);
-              pressTimer.current = window.setTimeout(() => handleAdminClick(), 900);
+              pressTimer.current = window.setTimeout(
+                () => handleAdminClick(),
+                900
+              );
             }}
             onTouchEnd={() => clearTimeout(pressTimer.current!)}
             title="Duplo clique ou segure para admin"
           >
             Promoções
           </h1>
+
           <p className="text-muted mb-0">Ofertas por tempo limitado</p>
 
           <div className="mt-2">
-            <Link to="/" className="btn btn-outline-secondary btn-sm">← Vitrine completa</Link>
+            <Link
+              to="/"
+              className="btn btn-outline-secondary btn-sm"
+            >
+              ← Vitrine completa
+            </Link>
           </div>
+
+          {/* CTA – à direita no desktop, embaixo no mobile */}
+          <Link
+            to="/agendar"
+            className="btn btn-primary btn-sm header-cta vitrine-cta-mobile"
+            aria-label={`Agendar e levar peças (${sacolaQtd})`}
+            title="Agendar e levar peças"
+          >
+            Agendar e levar peças ({sacolaQtd})
+          </Link>
         </div>
       </header>
 
+      {/* CONTEÚDO */}
       <section className="banner flex-grow-1">
         <div className="container-xxl py-5">
           <div className="hero-card p-3 p-sm-4 rounded-4">
@@ -265,7 +287,9 @@ export default function VitrinePromocoes() {
                         checked={ativo}
                         onChange={() => setCategoriaAtiva(cat)}
                       />
-                      <label htmlFor={id} className="filter-chip">{cat}</label>
+                      <label htmlFor={id} className="filter-chip">
+                        {cat}
+                      </label>
                     </span>
                   );
                 })}
@@ -275,7 +299,10 @@ export default function VitrinePromocoes() {
             {loading ? (
               <div className="row g-4 mt-2">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div className="col-12 col-sm-6 col-md-6 col-xl-4" key={i}>
+                  <div
+                    className="col-12 col-sm-6 col-md-6 col-xl-4"
+                    key={i}
+                  >
                     <div className="card product-card h-100 shadow-sm">
                       <div className="product-img skeleton" />
                       <div className="card-body text-center">
@@ -290,8 +317,12 @@ export default function VitrinePromocoes() {
               <div className="text-center py-5">
                 <p className="mb-3">Nenhuma promoção ativa no momento.</p>
                 <div className="d-flex justify-content-center gap-2">
-                  <Link to="/" className="btn btn-outline-light">← Vitrine completa</Link>
-                  <Link to="/agendar" className="btn btn-primary">Agendar horário</Link>
+                  <Link to="/" className="btn btn-outline-light">
+                    ← Vitrine completa
+                  </Link>
+                  <Link to="/agendar" className="btn btn-primary">
+                    Agendar horário
+                  </Link>
                 </div>
               </div>
             ) : (
@@ -301,36 +332,53 @@ export default function VitrinePromocoes() {
                   const dRest = diasRestantes(p.expiraEm);
                   const o = cents(p.precoOriginal);
                   const d = cents(p.precoPromocional);
-                  const off = o > 0 && d > 0 ? Math.max(0, Math.round((1 - d / o) * 100)) : null;
+                  const off =
+                    o > 0 && d > 0
+                      ? Math.max(0, Math.round((1 - d / o) * 100))
+                      : null;
 
                   return (
-                    <div className="col-12 col-sm-6 col-md-6 col-xl-4" key={p.id}>
+                    <div
+                      className="col-12 col-sm-6 col-md-6 col-xl-4"
+                      key={p.id}
+                    >
                       <div className="card product-card h-100 shadow-sm position-relative">
                         <span className="promo-badge">Promo</span>
-                        {off !== null && <span className="promo-off">{off}% OFF</span>}
+                        {off !== null && (
+                          <span className="promo-off">{off}% OFF</span>
+                        )}
 
                         <div className="product-img">
                           <img
                             src={p.imagem || PLACEHOLDER}
                             alt={p.nome}
-                            onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER; }}
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src =
+                                PLACEHOLDER;
+                            }}
                           />
                         </div>
 
                         <div className="card-body text-center">
                           <h5 className="card-title mb-1">{p.nome}</h5>
                           {p.categoria && (
-                            <p className="card-subtitle text-light-emphasis small">{p.categoria}</p>
+                            <p className="card-subtitle text-light-emphasis small">
+                              {p.categoria}
+                            </p>
                           )}
 
                           <div className="price-line my-2">
-                            {p.precoOriginal && <del className="me-2">{p.precoOriginal}</del>}
+                            {p.precoOriginal && (
+                              <del className="me-2">{p.precoOriginal}</del>
+                            )}
                             <strong>{p.precoPromocional}</strong>
                           </div>
 
                           {dRest !== null && (
                             <div className="text-danger small mb-1">
-                              {dRest === 0 ? "⚠️ Último dia!" : `⏳ Faltam ${dRest} dia(s)`}
+                              {dRest === 0
+                                ? "⚠️ Último dia!"
+                                : `⏳ Faltam ${dRest} dia(s)`}
                             </div>
                           )}
 
@@ -355,10 +403,20 @@ export default function VitrinePromocoes() {
                                 />
                                 <label
                                   htmlFor={cbId}
-                                  className={`reserve-label btn ${reservado ? "btn-success" : "btn-outline-primary"} btn-sm mt-2`}
-                                  title={reservado ? "Remover da sacola de prova" : "Reservar para provar"}
+                                  className={`reserve-label btn ${
+                                    reservado
+                                      ? "btn-success"
+                                      : "btn-outline-primary"
+                                  } btn-sm mt-2`}
+                                  title={
+                                    reservado
+                                      ? "Remover da sacola de prova"
+                                      : "Reservar para provar"
+                                  }
                                 >
-                                  {reservado ? "Reservado ✓" : "Reservar para provar"}
+                                  {reservado
+                                    ? "Reservado ✓"
+                                    : "Reservar para provar"}
                                 </label>
                               </>
                             );
@@ -374,14 +432,24 @@ export default function VitrinePromocoes() {
         </div>
       </section>
 
+      {/* FOOTER */}
       <footer className="app-footer bg-dark text-light text-center py-3 mt-auto position-relative">
         <div className="container">
           <Link to="/agendar" className="btn btn-outline-light mx-2">
             Agendar horário ({sacolaQtd})
           </Link>
-          <Link to="/" className="btn btn-outline-light mx-2">Vitrine completa</Link>
+          <Link to="/" className="btn btn-outline-light mx-2">
+            Vitrine completa
+          </Link>
         </div>
-        <button className="admin-foot-gear" onClick={handleAdminClick} aria-label="Admin" title="Admin">⚙️</button>
+        <button
+          className="admin-foot-gear"
+          onClick={handleAdminClick}
+          aria-label="Admin"
+          title="Admin"
+        >
+          ⚙️
+        </button>
       </footer>
     </div>
   );

@@ -1,10 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import "../../styles/Home.css";
 
 export default function Home() {
   const navigate = useNavigate();
-  const pressTimer = useRef<number | null>(null);
 
   const handleAdminClick = () => {
     const senhaCorreta = "12345";
@@ -13,24 +12,6 @@ export default function Home() {
     else if (senhaDigitada !== null) alert("❌ Senha incorreta!");
   };
 
-  // Atalho de teclado: Ctrl + Shift + A
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") {
-        handleAdminClick();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  // Long-press no título (útil no mobile)
-  const startPress = () => {
-    clearTimeout(pressTimer.current!);
-    pressTimer.current = window.setTimeout(() => handleAdminClick(), 900); // 0,9s
-  };
-  const endPress = () => clearTimeout(pressTimer.current!);
-
   return (
     <div className="home-container d-flex flex-column min-vh-100 position-relative">
       {/* Header */}
@@ -38,12 +19,7 @@ export default function Home() {
         <div className="container text-center">
           <h1
             className="fw-bold text-primary home-title"
-            onDoubleClick={handleAdminClick}
-            onMouseDown={startPress}
-            onMouseUp={endPress}
-            onTouchStart={startPress}
-            onTouchEnd={endPress}
-            title="Minha Loja (duplo clique ou segure para admin)"
+            title="Minha Loja"
           >
             Loja de Roupas
           </h1>

@@ -97,6 +97,7 @@
   from{ background-position: 200% 0; }
   to{   background-position: 0 0; }
 }
+
 /* Botão de reservar (toggle) */
 .reserve-btn{
   border-radius: 999px;
@@ -116,6 +117,7 @@
   outline: 2px solid rgba(255,255,255,.9);
   outline-offset: 2px;
 }
+
 /* Toggle nativo (checkbox + label como botão) */
 .reserve-input{
   position: absolute;
@@ -147,7 +149,7 @@
   box-shadow: 0 8px 18px rgba(16,185,129,.25);
 }
 
-/* CTA do header fixo à direita */
+/* CTA do header – à direita no desktop */
 .header-cta{
   position: absolute;
   right: 0;
@@ -155,12 +157,21 @@
   z-index: 1;       /* garante que fique acima do conteúdo do header */
 }
 
-/* No mobile, empilha abaixo do título */
+/* Botão do header: full width só em telas pequenas */
+.vitrine-cta-mobile {
+  width: auto; /* desktop e telas maiores */
+}
+
+/* Mobile: CTA desce e fica 100% largura */
 @media (max-width: 576px){
   .header-cta{
     position: static;
-    display: inline-flex;
-    margin-top: .5rem;
+    display: block;
+    margin-top: .75rem;
+  }
+  .vitrine-cta-mobile {
+    width: 100%;
+    display: block;
   }
 }
 

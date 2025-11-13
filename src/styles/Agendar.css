@@ -9,9 +9,15 @@
 /* Página */
 .agendar-container {
   font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
   min-height: 100vh;
+
+  /* NOVO BACKGROUND */
+  background:
+    radial-gradient(circle at top left, rgba(79, 70, 229, 0.12) 0, transparent 55%),
+    radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.16) 0, transparent 55%),
+    #f9fafb;
 }
+
 
 /* Header */
 .agendar-header {

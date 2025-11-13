@@ -104,3 +104,12 @@
   opacity: .8;
   transform: rotate(15deg) scale(1.05);
 }
+
+.home-header {
+  background-color: #020617; /* cor que você quiser */
+  color: #f9fafb;
+}
+
+.home-header p {
+  color: #e5e7eb; /* cor do subtítulo */
+}

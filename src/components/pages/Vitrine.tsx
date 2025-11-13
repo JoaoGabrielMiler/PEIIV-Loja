@@ -54,7 +54,9 @@ const formatBRL = (v?: number | string) => {
   if (v === undefined || v === null) return "—";
   if (typeof v === "number")
     return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  const n = Number(v.replace(/[^\d.,-]/g, "").replace(/\./g, "").replace(",", "."));
+  const n = Number(
+    v.replace(/[^\d.,-]/g, "").replace(/\./g, "").replace(",", ".")
+  );
   return Number.isFinite(n)
     ? n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
     : v;
@@ -67,17 +69,21 @@ export default function Vitrine() {
   const [sacolaQtd, setSacolaQtd] = useState<number>(0);
   const navigate = useNavigate();
 
-  // ---- Admin escondido
+  // ---- Admin escondido (duplo clique / long press no título + atalho teclado)
   const pressTimer = useRef<number | null>(null);
+
   const handleAdminClick = () => {
     const senhaCorreta = "12345";
     const senhaDigitada = prompt("Digite a senha de administrador:");
     if (senhaDigitada === senhaCorreta) navigate("/admin");
     else if (senhaDigitada !== null) alert("❌ Senha incorreta!");
   };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") handleAdminClick();
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") {
+        handleAdminClick();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -87,7 +93,8 @@ export default function Vitrine() {
   useEffect(() => {
     setSacolaQtd(countSacola());
 
-    const usarMock = new URLSearchParams(window.location.search).get("mock") === "1";
+    const usarMock =
+      new URLSearchParams(window.location.search).get("mock") === "1";
     if (usarMock) {
       setProdutos(MOCK_PRODUTOS);
       setLoading(false);
@@ -99,8 +106,10 @@ export default function Vitrine() {
     const unsubscribe = onSnapshot(
       q,
       (snap) => {
-        const lista = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Produto[];
-        // se não houver docs, mantemos vazio (ou use MOCK_PRODUTOS se preferir)
+        const lista = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as any),
+        })) as Produto[];
         setProdutos(lista.length ? lista : []);
         setLoading(false);
       },
@@ -139,7 +148,10 @@ export default function Vitrine() {
   }, [CATEGORIAS_FIXAS, categoriasDinamicas]);
 
   const filtrados = useMemo(
-    () => produtos.filter((p) => (categoriaAtiva === "Todos" ? true : p.categoria === categoriaAtiva)),
+    () =>
+      produtos.filter((p) =>
+        categoriaAtiva === "Todos" ? true : p.categoria === categoriaAtiva
+      ),
     [produtos, categoriaAtiva]
   );
 
@@ -156,52 +168,69 @@ export default function Vitrine() {
 
   return (
     <div className="vitrine-container min-vh-100 d-flex flex-column">
+            {/* HEADER */}
       <header className="bg-light shadow-sm py-3">
         <div className="container position-relative text-center">
-          <Link
-            to="/agendar"
-            className="btn btn-primary btn-sm header-cta"
-            aria-label={`Agendar e levar peças (${sacolaQtd})`}
-            title="Agendar e levar peças"
-          >
-            Agendar e levar peças ({sacolaQtd})
-          </Link>
-
+          {/* Título centralizado */}
           <h1
             className="fw-bold text-primary page-title"
             onDoubleClick={handleAdminClick}
             onMouseDown={() => {
               clearTimeout(pressTimer.current!);
-              pressTimer.current = window.setTimeout(() => handleAdminClick(), 900);
+              pressTimer.current = window.setTimeout(
+                () => handleAdminClick(),
+                900
+              );
             }}
             onMouseUp={() => clearTimeout(pressTimer.current!)}
             onTouchStart={() => {
               clearTimeout(pressTimer.current!);
-              pressTimer.current = window.setTimeout(() => handleAdminClick(), 900);
+              pressTimer.current = window.setTimeout(
+                () => handleAdminClick(),
+                900
+              );
             }}
             onTouchEnd={() => clearTimeout(pressTimer.current!)}
             title="Duplo clique ou segure para admin"
           >
             Vitrine
           </h1>
-          <p className="text-muted mb-0">Confira nossos produtos disponíveis</p>
+
+          <p className="text-muted mb-0">
+            Confira nossos produtos disponíveis
+          </p>
 
           <div className="mt-2">
             <Link to="/promocoes" className="btn btn-outline-primary btn-sm">
               Ver promoções
             </Link>
           </div>
+
+          {/* CTA – à direita no desktop, abaixo de 'Ver promoções' no mobile */}
+          <Link
+            to="/agendar"
+            className="btn btn-primary btn-sm header-cta vitrine-cta-mobile"
+            aria-label={`Agendar e levar peças (${sacolaQtd})`}
+            title="Agendar e levar peças"
+          >
+            Agendar e separar peças ({sacolaQtd})
+          </Link>
         </div>
       </header>
 
-      {/* Área central */}
+
+      {/* ÁREA CENTRAL */}
       <section className="banner flex-grow-1">
         <div className="container-xxl py-5">
           <div className="hero-card p-3 p-sm-4 rounded-4">
             {/* Barra seletora (chips) */}
             <fieldset className="chip-fieldset">
               <legend className="visualmente-hidden">Filtrar por estilo</legend>
-              <div className="chip-bar" role="group" aria-label="Opções de estilo">
+              <div
+                className="chip-bar"
+                role="group"
+                aria-label="Opções de estilo"
+              >
                 {categorias.map((cat) => {
                   const id = `chip-${cat.toLowerCase().replace(/\s+/g, "-")}`;
                   const ativo = cat === categoriaAtiva;
@@ -224,7 +253,7 @@ export default function Vitrine() {
               </div>
             </fieldset>
 
-            {/* Grid */}
+            {/* Grid de produtos */}
             {loading ? (
               <div className="row g-4 mt-2">
                 {Array.from({ length: 9 }).map((_, i) => (
@@ -243,8 +272,12 @@ export default function Vitrine() {
               <div className="text-center py-5">
                 <p className="mb-3">Nenhum produto encontrado.</p>
                 <div className="d-flex justify-content-center gap-2">
-                  <Link to="/" className="btn btn-outline-light">← Voltar</Link>
-                  <Link to="/agendar" className="btn btn-primary">Agendar horário</Link>
+                  <Link to="/" className="btn btn-outline-light">
+                    ← Voltar
+                  </Link>
+                  <Link to="/agendar" className="btn btn-primary">
+                    Agendar horário
+                  </Link>
                 </div>
               </div>
             ) : (
@@ -252,14 +285,18 @@ export default function Vitrine() {
                 {filtrados.map((p) => {
                   const reservado = isInSacola(p.id);
                   return (
-                    <div className="col-12 col-sm-6 col-md-6 col-xl-4" key={p.id}>
+                    <div
+                      className="col-12 col-sm-6 col-md-6 col-xl-4"
+                      key={p.id}
+                    >
                       <div className="card product-card h-100 shadow-sm">
                         <div className="product-img">
                           <img
                             src={p.imagem || PLACEHOLDER}
                             alt={p.nome}
                             onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).src = PLACEHOLDER;
+                              (e.currentTarget as HTMLImageElement).src =
+                                PLACEHOLDER;
                             }}
                           />
                         </div>
@@ -295,10 +332,20 @@ export default function Vitrine() {
                                 />
                                 <label
                                   htmlFor={cbId}
-                                  className={`reserve-label btn ${reservado ? "btn-success" : "btn-outline-primary"} btn-sm mt-2`}
-                                  title={reservado ? "Remover da sacola de prova" : "Reservar para provar"}
+                                  className={`reserve-label btn ${
+                                    reservado
+                                      ? "btn-success"
+                                      : "btn-outline-primary"
+                                  } btn-sm mt-2`}
+                                  title={
+                                    reservado
+                                      ? "Remover da sacola de prova"
+                                      : "Reservar para provar"
+                                  }
                                 >
-                                  {reservado ? "Reservado ✓" : "Reservar para provar"}
+                                  {reservado
+                                    ? "Reservado ✓"
+                                    : "Reservar para provar"}
                                 </label>
                               </>
                             );
@@ -314,15 +361,24 @@ export default function Vitrine() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* FOOTER */}
       <footer className="app-footer bg-dark text-light text-center py-3 mt-auto position-relative">
         <div className="container">
           <Link to="/agendar" className="btn btn-outline-light mx-2">
             Agendar horário ({sacolaQtd})
           </Link>
-          <Link to="/" className="btn btn-outline-light mx-2">Voltar</Link>
+          <Link to="/" className="btn btn-outline-light mx-2">
+            Voltar
+          </Link>
         </div>
-        <button className="admin-foot-gear" onClick={handleAdminClick} aria-label="Admin" title="Admin">⚙️</button>
+        <button
+          className="admin-foot-gear"
+          onClick={handleAdminClick}
+          aria-label="Admin"
+          title="Admin"
+        >
+          ⚙️
+        </button>
       </footer>
     </div>
   );
