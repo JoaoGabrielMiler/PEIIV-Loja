@@ -29,37 +29,37 @@ export default function AdminListar() {
   const [horarios, setHorarios] = useState<HorarioDoc[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // estados de edição (produto)
+  // ===== edição de produto
   const [editProdId, setEditProdId] = useState<string | null>(null);
+  const [editNome, setEditNome] = useState<string>("");
+  const [editDescricao, setEditDescricao] = useState<string>("");
   const [editPreco, setEditPreco] = useState<string>("");
   const [editPromo, setEditPromo] = useState<boolean>(false);
 
-  // estados de edição (horários)
+  // ===== edição de horários
   const [editHorId, setEditHorId] = useState<string | null>(null);
   const [editHoras, setEditHoras] = useState<string[]>([]);
   const [novoHorario, setNovoHorario] = useState<string>("");
 
-  // helpers
+  // ===== helpers
   const toBRL = (v?: number | string) => {
     if (v === undefined || v === null) return "—";
     if (typeof v === "number")
       return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    // string já formatada?
     if (v.toString().trim().startsWith("R$")) return v.toString();
     const n = parseRealToNumber(v.toString());
-    if (Number.isFinite(n))
-      return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    return v.toString();
+    return Number.isFinite(n)
+      ? n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+      : v.toString();
   };
 
   const parseRealToNumber = (raw: string) => {
-    // remove tudo que não for dígito, vírgula, ponto, ou sinal
     const s = raw.replace(/[^\d.,-]/g, "").replace(/\./g, "").replace(",", ".");
     const n = Number(s);
     return Number.isFinite(n) ? n : NaN;
   };
 
-  // carregamento
+  // ===== carregamento
   const carregarProdutos = async () => {
     const snap = await getDocs(collection(db, "produtos"));
     const lista: Produto[] = [];
@@ -73,7 +73,6 @@ export default function AdminListar() {
     snap.forEach((docu) =>
       lista.push({ id: docu.id, ...(docu.data() as any) })
     );
-    // ordena por data asc
     lista.sort((a, b) => a.id.localeCompare(b.id));
     setHorarios(lista);
   };
@@ -88,7 +87,7 @@ export default function AdminListar() {
     reloadAll();
   }, []);
 
-  // ações: produtos
+  // ===== ações de produto
   const removerProduto = async (id: string) => {
     if (!confirm("Tem certeza que deseja remover este produto?")) return;
     await deleteDoc(doc(db, "produtos", id));
@@ -97,34 +96,47 @@ export default function AdminListar() {
 
   const iniciarEdicaoProduto = (p: Produto) => {
     setEditProdId(p.id);
-    setEditPreco(
-      typeof p.preco === "number" ? p.preco.toString() : (p.preco ?? "")
-    );
+    setEditNome(p.nome ?? "");
+    setEditDescricao(p.descricao ?? "");
+    setEditPreco(typeof p.preco === "number" ? p.preco.toString() : (p.preco ?? ""));
     setEditPromo(!!p.promocao);
   };
 
   const cancelarEdicaoProduto = () => {
     setEditProdId(null);
+    setEditNome("");
+    setEditDescricao("");
     setEditPreco("");
     setEditPromo(false);
   };
 
   const salvarProduto = async () => {
     if (!editProdId) return;
+
+    const nomeTrim = editNome.trim();
+    if (nomeTrim.length === 0) {
+      alert("Informe um nome para o produto.");
+      return;
+    }
+
     const precoNumber = parseRealToNumber(editPreco);
     if (!Number.isFinite(precoNumber) || precoNumber < 0) {
       alert("Preço inválido.");
       return;
     }
+
     await updateDoc(doc(db, "produtos", editProdId), {
-      preco: precoNumber,     // salva como number (recomendado)
+      nome: nomeTrim,
+      descricao: editDescricao.trim(),
+      preco: precoNumber, // salva como number
       promocao: editPromo,
     });
+
     cancelarEdicaoProduto();
     await carregarProdutos();
   };
 
-  // ações: horários
+  // ===== ações de horários
   const removerHorario = async (id: string) => {
     if (!confirm("Remover horários do dia " + id + "?")) return;
     await deleteDoc(doc(db, "horariosDisponiveis", id));
@@ -194,7 +206,7 @@ export default function AdminListar() {
       </header>
 
       <main className="container py-4 flex-grow-1">
-        {/* PRODUTOS */}
+        {/* ================== PRODUTOS ================== */}
         <section>
           <h2 className="text-center mb-3">🛍️ Produtos Cadastrados</h2>
           <div className="row g-4">
@@ -213,14 +225,28 @@ export default function AdminListar() {
                           className="card-img-top product-card__img"
                         />
                       )}
-                      <div className="card-body text-center">
-                        <h5 className="product-card__title">{p.nome}</h5>
 
-                        {/* PREÇO / EDIÇÃO */}
+                      <div className="card-body text-center">
+                        {/* Nome */}
+                        {!emEdicao ? (
+                          <h5 className="product-card__title">{p.nome}</h5>
+                        ) : (
+                          <div className="inline-edit mb-2 text-start">
+                            <label className="inline-edit__label">Nome</label>
+                            <input
+                              className="form-control inline-edit__input"
+                              value={editNome}
+                              onChange={(e) => setEditNome(e.target.value)}
+                              placeholder="Nome do produto"
+                            />
+                          </div>
+                        )}
+
+                        {/* Preço */}
                         {!emEdicao ? (
                           <p className="product-card__price">{toBRL(p.preco)}</p>
                         ) : (
-                          <div className="inline-edit">
+                          <div className="inline-edit text-start">
                             <label className="inline-edit__label">Preço</label>
                             <input
                               value={editPreco}
@@ -232,14 +258,27 @@ export default function AdminListar() {
                           </div>
                         )}
 
-                        {/* DESCRIÇÃO */}
-                        {p.descricao && (
-                          <p className="text-muted small product-card__desc">
-                            {p.descricao}
-                          </p>
+                        {/* Descrição */}
+                        {!emEdicao ? (
+                          p.descricao && (
+                            <p className="text-muted small product-card__desc">
+                              {p.descricao}
+                            </p>
+                          )
+                        ) : (
+                          <div className="inline-edit text-start mt-2">
+                            <label className="inline-edit__label">Descrição</label>
+                            <textarea
+                              className="form-control"
+                              rows={3}
+                              value={editDescricao}
+                              onChange={(e) => setEditDescricao(e.target.value)}
+                              placeholder="Breve descrição..."
+                            />
+                          </div>
                         )}
 
-                        {/* PROMOÇÃO */}
+                        {/* Promoção */}
                         <div className="d-flex justify-content-center align-items-center gap-2 my-2">
                           {!emEdicao ? (
                             p.promocao ? (
@@ -263,7 +302,7 @@ export default function AdminListar() {
                           )}
                         </div>
 
-                        {/* AÇÕES */}
+                        {/* Ações */}
                         {!emEdicao ? (
                           <div className="d-flex justify-content-center gap-2">
                             <button
@@ -306,7 +345,7 @@ export default function AdminListar() {
 
         <hr className="my-5" />
 
-        {/* HORÁRIOS */}
+        {/* ================== HORÁRIOS ================== */}
         <section>
           <h2 className="text-center mb-3">🕒 Horários Disponíveis</h2>
           {horarios.length === 0 ? (
@@ -349,7 +388,6 @@ export default function AdminListar() {
                           <strong>{h.id}</strong>
                         </div>
 
-                        {/* chips de horários */}
                         <div className="chips mb-2">
                           {editHoras.map((hora) => (
                             <span key={hora} className="chip">
@@ -368,7 +406,6 @@ export default function AdminListar() {
                           )}
                         </div>
 
-                        {/* adicionar novo horário */}
                         <div className="d-flex gap-2 mb-2">
                           <input
                             className="form-control"

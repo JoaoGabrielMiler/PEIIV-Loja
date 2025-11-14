@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { db } from "../../firebaseConfig";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
@@ -69,9 +69,7 @@ export default function Vitrine() {
   const [sacolaQtd, setSacolaQtd] = useState<number>(0);
   const navigate = useNavigate();
 
-  // ---- Admin escondido (duplo clique / long press no título + atalho teclado)
-  const pressTimer = useRef<number | null>(null);
-
+  // ---- Acesso admin: atalho de teclado (Ctrl+Shift+A) + engrenagem no rodapé
   const handleAdminClick = () => {
     const senhaCorreta = "12345";
     const senhaDigitada = prompt("Digite a senha de administrador:");
@@ -101,7 +99,6 @@ export default function Vitrine() {
       return;
     }
 
-    // 📡 Tempo real: se o preço for alterado no Admin, a vitrine atualiza sozinha
     const q = query(collection(db, "produtos"), orderBy("nome"));
     const unsubscribe = onSnapshot(
       q,
@@ -123,7 +120,6 @@ export default function Vitrine() {
     return () => unsubscribe();
   }, []);
 
-  // CATEGORIAS FIXAS
   const CATEGORIAS_FIXAS = [
     "Todos",
     "Vestido",
@@ -155,7 +151,6 @@ export default function Vitrine() {
     [produtos, categoriaAtiva]
   );
 
-  // Toggle na sacola
   const handleToggleReserva = (p: Produto) => {
     toggleItem({
       produtoId: p.id,
@@ -168,31 +163,11 @@ export default function Vitrine() {
 
   return (
     <div className="vitrine-container min-vh-100 d-flex flex-column">
-            {/* HEADER */}
+      {/* HEADER */}
       <header className="bg-light shadow-sm py-3">
         <div className="container position-relative text-center">
-          {/* Título centralizado */}
-          <h1
-            className="fw-bold text-primary page-title"
-            onDoubleClick={handleAdminClick}
-            onMouseDown={() => {
-              clearTimeout(pressTimer.current!);
-              pressTimer.current = window.setTimeout(
-                () => handleAdminClick(),
-                900
-              );
-            }}
-            onMouseUp={() => clearTimeout(pressTimer.current!)}
-            onTouchStart={() => {
-              clearTimeout(pressTimer.current!);
-              pressTimer.current = window.setTimeout(
-                () => handleAdminClick(),
-                900
-              );
-            }}
-            onTouchEnd={() => clearTimeout(pressTimer.current!)}
-            title="Duplo clique ou segure para admin"
-          >
+          {/* Título centralizado (sem mais atalho de admin aqui) */}
+          <h1 className="fw-bold text-primary page-title">
             Vitrine
           </h1>
 
@@ -206,7 +181,6 @@ export default function Vitrine() {
             </Link>
           </div>
 
-          {/* CTA – à direita no desktop, abaixo de 'Ver promoções' no mobile */}
           <Link
             to="/agendar"
             className="btn btn-primary btn-sm header-cta vitrine-cta-mobile"
@@ -218,12 +192,10 @@ export default function Vitrine() {
         </div>
       </header>
 
-
       {/* ÁREA CENTRAL */}
       <section className="banner flex-grow-1">
         <div className="container-xxl py-5">
           <div className="hero-card p-3 p-sm-4 rounded-4">
-            {/* Barra seletora (chips) */}
             <fieldset className="chip-fieldset">
               <legend className="visualmente-hidden">Filtrar por estilo</legend>
               <div
@@ -306,7 +278,6 @@ export default function Vitrine() {
                             {p.categoria || " "}
                           </p>
 
-                          {/* Preço + Promoção */}
                           <div className="d-flex justify-content-center align-items-center gap-2 mt-1">
                             <span className="fw-bold text-primary">
                               {formatBRL(p.preco)}
@@ -318,7 +289,6 @@ export default function Vitrine() {
                             )}
                           </div>
 
-                          {/* Reservar */}
                           {(() => {
                             const cbId = `res-${p.id}`;
                             return (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { db } from "../../firebaseConfig";
 import {
@@ -29,26 +29,23 @@ export default function Agendar() {
   const [itens, setItens] = useState<ItemProva[]>([]);
   const navigate = useNavigate();
 
-  // -------- Admin escondido
-  const pressTimer = useRef<number | null>(null);
+  // -------- Admin (atalho de teclado + engrenagem no rodapé)
   const handleAdminClick = () => {
     const senhaCorreta = "12345";
     const senhaDigitada = prompt("Digite a senha de administrador:");
     if (senhaDigitada === senhaCorreta) navigate("/admin");
     else if (senhaDigitada !== null) alert("❌ Senha incorreta!");
   };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") handleAdminClick();
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") {
+        handleAdminClick();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  const startPress = () => {
-    clearTimeout(pressTimer.current!);
-    pressTimer.current = window.setTimeout(() => handleAdminClick(), 900);
-  };
-  const endPress = () => clearTimeout(pressTimer.current!);
   // --------
 
   // Carrega sacola ao abrir
@@ -62,10 +59,15 @@ export default function Agendar() {
       // 1) base do admin
       const baseRef = doc(db, "horariosDisponiveis", dataSelecionada);
       const baseSnap = await getDoc(baseRef);
-      const baseHoras: string[] = baseSnap.exists() ? (baseSnap.data().horas || []) : [];
+      const baseHoras: string[] = baseSnap.exists()
+        ? (baseSnap.data().horas || [])
+        : [];
 
       // 2) já reservados nessa data
-      const q = query(collection(db, "agendamentos"), where("data", "==", dataSelecionada));
+      const q = query(
+        collection(db, "agendamentos"),
+        where("data", "==", dataSelecionada)
+      );
       const snap = await getDocs(q);
       const ocupados = new Set(snap.docs.map((d) => (d.data() as any).hora));
 
@@ -110,9 +112,9 @@ export default function Agendar() {
         tx.set(ref, {
           nome,
           telefone,
-          data,       // "YYYY-MM-DD"
-          hora,       // "HH:mm"
-          itens,      // <<<<<< guarda a sacola junto no doc
+          data, // "YYYY-MM-DD"
+          hora, // "HH:mm"
+          itens, // guarda a sacola junto no doc
           criadoEm: serverTimestamp(),
         });
       });
@@ -121,7 +123,10 @@ export default function Agendar() {
       const payload = { nome, telefone, data, hora };
       clearSacola();
       setItens([]);
-      setNome(""); setTelefone(""); setData(""); setHora("");
+      setNome("");
+      setTelefone("");
+      setData("");
+      setHora("");
       navigate("/confirmacao", { state: payload });
     } catch (error: any) {
       alert(error?.message || "❌ Não foi possível reservar este horário.");
@@ -137,18 +142,12 @@ export default function Agendar() {
       {/* HEADER */}
       <header className="agendar-header py-4">
         <div className="container text-center">
-          <h1
-            className="agendar-title display-5"
-            onDoubleClick={handleAdminClick}
-            onMouseDown={startPress}
-            onMouseUp={endPress}
-            onTouchStart={startPress}
-            onTouchEnd={endPress}
-            title="Duplo clique ou segure para admin"
-          >
+          <h1 className="agendar-title display-5">
             Agendar Horário
           </h1>
-          <p className="agendar-subtitle mb-0">Preencha as informações abaixo</p>
+          <p className="agendar-subtitle mb-0">
+            Preencha as informações abaixo
+          </p>
         </div>
       </header>
 
@@ -156,17 +155,24 @@ export default function Agendar() {
       <main className="container py-4 flex-grow-1">
         <section className="agendar-section" aria-labelledby="titulo-agendar">
           <h2 id="titulo-agendar" className="section-title">
-            <span className="emoji" role="img" aria-label="Calendário">📅</span>
+            <span className="emoji" role="img" aria-label="Calendário">
+              📅
+            </span>
             Dados do Agendamento
           </h2>
 
           <div className="card agendar-card">
             <div className="card-body">
-              <form className="agendar-form mx-auto" onSubmit={confirmarAgendamento}>
+              <form
+                className="agendar-form mx-auto"
+                onSubmit={confirmarAgendamento}
+              >
                 <h3 className="h5 mb-3">Seus dados</h3>
 
                 <div className="mb-3">
-                  <label className="form-label" htmlFor="nome">Nome completo</label>
+                  <label className="form-label" htmlFor="nome">
+                    Nome completo
+                  </label>
                   <input
                     id="nome"
                     type="text"
@@ -179,7 +185,9 @@ export default function Agendar() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label" htmlFor="tel">Telefone</label>
+                  <label className="form-label" htmlFor="tel">
+                    Telefone
+                  </label>
                   <input
                     id="tel"
                     type="tel"
@@ -195,7 +203,9 @@ export default function Agendar() {
                 <h3 className="h5 mt-4 mb-3">Data e horário</h3>
                 <div className="row">
                   <div className="col-md-6 mb-3">
-                    <label className="form-label" htmlFor="data">Data</label>
+                    <label className="form-label" htmlFor="data">
+                      Data
+                    </label>
                     <input
                       id="data"
                       type="date"
@@ -215,7 +225,9 @@ export default function Agendar() {
                   </div>
 
                   <div className="col-md-6 mb-3">
-                    <label className="form-label" htmlFor="hora">Hora</label>
+                    <label className="form-label" htmlFor="hora">
+                      Hora
+                    </label>
                     <select
                       id="hora"
                       className="form-select"
@@ -225,39 +237,66 @@ export default function Agendar() {
                       disabled={!dataEscolhida}
                     >
                       <option value="">
-                        {dataEscolhida ? "Selecione um horário" : "Selecione uma data primeiro"}
+                        {dataEscolhida
+                          ? "Selecione um horário"
+                          : "Selecione uma data primeiro"}
                       </option>
-                      {dataEscolhida && (
-                        horariosDisponiveis.length > 0 ? (
+                      {dataEscolhida &&
+                        (horariosDisponiveis.length > 0 ? (
                           horariosDisponiveis.map((h) => (
-                            <option key={h} value={h}>{h}</option>
+                            <option key={h} value={h}>
+                              {h}
+                            </option>
                           ))
                         ) : (
                           <option disabled>Nenhum horário disponível</option>
-                        )
-                      )}
+                        ))}
                     </select>
                   </div>
                 </div>
 
                 {/* Itens selecionados para provar */}
-                <h3 className="h5 mt-4 mb-3">Peças selecionadas para provar</h3>
+                <h3 className="h5 mt-4 mb-3">
+                  Peças selecionadas para provar
+                </h3>
                 {itens.length === 0 ? (
-                  <p className="text-muted">Nenhuma peça selecionada na vitrine.</p>
+                  <p className="text-muted">
+                    Nenhuma peça selecionada na vitrine.
+                  </p>
                 ) : (
                   <ul className="list-group mb-3">
                     {itens.map((it) => (
-                      <li key={it.produtoId} className="list-group-item d-flex align-items-center justify-content-between">
+                      <li
+                        key={it.produtoId}
+                        className="list-group-item d-flex align-items-center justify-content-between"
+                      >
                         <div className="d-flex align-items-center gap-2">
                           {it.imagem && (
-                            <img src={it.imagem} alt={it.nome} width={48} height={48} style={{ borderRadius: 8, objectFit: "cover" }} />
+                            <img
+                              src={it.imagem}
+                              alt={it.nome}
+                              width={48}
+                              height={48}
+                              style={{
+                                borderRadius: 8,
+                                objectFit: "cover",
+                              }}
+                            />
                           )}
                           <div>
                             <div className="fw-semibold">{it.nome}</div>
-                            {it.categoria && <small className="text-muted">{it.categoria}</small>}
+                            {it.categoria && (
+                              <small className="text-muted">
+                                {it.categoria}
+                              </small>
+                            )}
                           </div>
                         </div>
-                        <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removerItemLocal(it.produtoId)}>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => removerItemLocal(it.produtoId)}
+                        >
                           Remover
                         </button>
                       </li>
@@ -265,10 +304,18 @@ export default function Agendar() {
                   </ul>
                 )}
 
-                <button type="submit" className="btn btn-gradient w-100 mt-2" disabled={enviando}>
+                <button
+                  type="submit"
+                  className="btn btn-gradient w-100 mt-2"
+                  disabled={enviando}
+                >
                   {enviando ? (
                     <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      />
                       Enviando...
                     </>
                   ) : (
@@ -276,7 +323,9 @@ export default function Agendar() {
                   )}
                 </button>
 
-                <Link to="/" className="btn btn-ghost w-100 mt-2">← Voltar</Link>
+                <Link to="/" className="btn btn-ghost w-100 mt-2">
+                  ← Voltar
+                </Link>
               </form>
             </div>
           </div>

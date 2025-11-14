@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { db } from "../../firebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -136,14 +136,14 @@ export default function VitrinePromocoes() {
   const [sacolaQtd, setSacolaQtd] = useState<number>(0);
   const navigate = useNavigate();
 
-  // Admin oculto
-  const pressTimer = useRef<number | null>(null);
+  // Admin: atalho de teclado + engrenagem no rodapé
   const handleAdminClick = () => {
     const senhaCorreta = "12345";
     const senhaDigitada = prompt("Digite a senha de administrador:");
     if (senhaDigitada === senhaCorreta) navigate("/admin");
     else if (senhaDigitada !== null) alert("❌ Senha incorreta!");
   };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a")
@@ -220,37 +220,14 @@ export default function VitrinePromocoes() {
       {/* HEADER */}
       <header className="bg-light shadow-sm py-3">
         <div className="container position-relative text-center">
-          <h1
-            className="fw-bold text-danger page-title"
-            onDoubleClick={handleAdminClick}
-            onMouseDown={() => {
-              clearTimeout(pressTimer.current!);
-              pressTimer.current = window.setTimeout(
-                () => handleAdminClick(),
-                900
-              );
-            }}
-            onMouseUp={() => clearTimeout(pressTimer.current!)}
-            onTouchStart={() => {
-              clearTimeout(pressTimer.current!);
-              pressTimer.current = window.setTimeout(
-                () => handleAdminClick(),
-                900
-              );
-            }}
-            onTouchEnd={() => clearTimeout(pressTimer.current!)}
-            title="Duplo clique ou segure para admin"
-          >
+          <h1 className="fw-bold text-danger page-title">
             Promoções
           </h1>
 
           <p className="text-muted mb-0">Ofertas por tempo limitado</p>
 
           <div className="mt-2">
-            <Link
-              to="/"
-              className="btn btn-outline-secondary btn-sm"
-            >
+            <Link to="/Vitrine" className="btn btn-outline-secondary btn-sm">
               ← Vitrine completa
             </Link>
           </div>
@@ -262,7 +239,7 @@ export default function VitrinePromocoes() {
             aria-label={`Agendar e levar peças (${sacolaQtd})`}
             title="Agendar e levar peças"
           >
-            Agendar e levar peças ({sacolaQtd})
+            Agendar e separar peças ({sacolaQtd})
           </Link>
         </div>
       </header>
