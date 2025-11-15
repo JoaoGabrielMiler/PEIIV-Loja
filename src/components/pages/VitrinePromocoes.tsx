@@ -153,6 +153,7 @@ export default function VitrinePromocoes() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // ======= BUSCA PROMOÇÕES A PARTIR DE "produtos" (promocao === true) =======
   useEffect(() => {
     setSacolaQtd(countSacola());
 
@@ -165,19 +166,50 @@ export default function VitrinePromocoes() {
           return;
         }
 
-        const agora = new Date();
-        const q = query(
-          collection(db, "promocoes"),
-          where("ativo", "==", true),
-          where("expiraEm", ">=", agora)
+        // Buscar produtos marcados como promocao = true
+        const qProdutos = query(
+          collection(db, "produtos"),
+          where("promocao", "==", true)
         );
-        const snap = await getDocs(q);
-        const lista = snap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        })) as Promocao[];
+        const snap = await getDocs(qProdutos);
+
+        // helper para formatar em R$ tanto string quanto number
+        const formatBRL = (valor: any): string | null => {
+          if (valor == null) return null;
+          if (typeof valor === "string" && valor.trim().startsWith("R$")) {
+            return valor;
+          }
+          const n = Number(valor);
+          if (!Number.isFinite(n)) return null;
+          return n.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          });
+        };
+
+        const lista: Promocao[] = snap.docs.map((d) => {
+          const data = d.data() as any;
+
+          return {
+            id: d.id,
+            nome: data.nome ?? "",
+            imagem: data.imagem,
+            categoria: data.categoria,
+            descricao: data.descricao,
+            // se tiver precoOriginal salvo, usamos; senão fica null
+            precoOriginal: data.precoOriginal
+              ? formatBRL(data.precoOriginal)
+              : null,
+            // se tiver precoPromocional, usamos; senão usamos preco normal
+            precoPromocional:
+              formatBRL(data.precoPromocional ?? data.preco) ?? "—",
+            expiraEm: data.expiraEm, // opcional – se não tiver, some o contador
+          };
+        });
 
         if (lista.length === 0) {
+          // se não tiver nenhum produto marcado como promoção,
+          // mantém o comportamento de usar MOCK
           setItens(MOCK_PROMOS);
         } else {
           setItens(lista);
