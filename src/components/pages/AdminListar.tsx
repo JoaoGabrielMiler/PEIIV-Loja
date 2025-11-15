@@ -177,15 +177,14 @@ export default function AdminListar() {
     const payload: any = {
       nome: nomeTrim,
       descricao: editDescricao.trim(),
-      preco: precoNumber, // salva como number
+      preco: precoNumber,
       promocao: editPromo,
     };
 
     if (expiraDate) {
       payload.expiraEm = expiraDate;
     } else {
-      // se não for promoção, limpamos o campo
-      payload.expiraEm = null;
+      payload.expiraEm = null; // limpa se não for promoção
     }
 
     await updateDoc(doc(db, "produtos", editProdId), payload);
@@ -194,7 +193,7 @@ export default function AdminListar() {
     await carregarProdutos();
   };
 
-  // ===== NOVO: toggle rápido de promoção (com dias de duração)
+  // ===== toggle rápido de promoção (com dias de duração)
   const togglePromocaoRapida = async (produto: Produto) => {
     if (editProdId === produto.id) {
       // se já estiver em edição, usa o fluxo de salvar/cancelar
@@ -297,6 +296,7 @@ export default function AdminListar() {
   // função para renderizar um card de produto (reaproveitada nas duas listas)
   const renderProdutoCard = (p: Produto) => {
     const emEdicao = editProdId === p.id;
+    const expiraInputId = `expira-${p.id}`; // ID único pro input de data
 
     return (
       <div className="col-12 col-sm-6 col-md-4" key={p.id}>
@@ -395,14 +395,20 @@ export default function AdminListar() {
 
                   {editPromo && (
                     <div className="w-100 text-start mt-1">
-                      <label className="inline-edit__label">
+                      <label
+                        htmlFor={expiraInputId}
+                        className="inline-edit__label"
+                      >
                         Validade da promoção
                       </label>
                       <input
+                        id={expiraInputId}
                         type="date"
                         className="form-control inline-edit__input"
                         value={editExpiraEm}
                         onChange={(e) => setEditExpiraEm(e.target.value)}
+                        placeholder="Selecione a data"
+                        title="Data em que a promoção termina"
                       />
                     </div>
                   )}
